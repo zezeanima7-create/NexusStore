@@ -17,15 +17,19 @@
   <main class="mx-auto max-w-6xl space-y-6">
     <header class="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-800 bg-slate-900 p-4">
       <a href="#" class="text-lg font-extrabold" aria-label="NexusStore início">Nexus<span class="text-indigo-400">Store</span></a>
-      <nav class="flex flex-wrap gap-2 text-xs font-semibold" aria-label="Navegação principal">
-        <button class="rounded-xl bg-indigo-600 px-3 py-2 hover:bg-indigo-500" onclick="setView('shop')">Loja</button>
-        <button class="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-amber-300" onclick="setView('check')">Analisador</button>
-        <button class="rounded-xl bg-slate-800 px-3 py-2 hover:bg-slate-700" onclick="openModal('add-modal')">+ Produto</button>
-        <button class="rounded-xl bg-slate-800 px-3 py-2 hover:bg-slate-700" onclick="openAccount()">Conta</button>
-        <button class="rounded-xl bg-slate-800 px-3 py-2 hover:bg-slate-700" onclick="openModal('currency-modal');loadRates()">Câmbio</button>
-        <button class="rounded-xl bg-slate-800 px-3 py-2 hover:bg-slate-700" onclick="openModal('keys-modal');renderKeys()">Keys (<span id="k-count">0</span>)</button>
-        <button class="rounded-xl bg-cyan-700 px-3 py-2 hover:bg-cyan-600" onclick="openModal('cart-modal');renderCart()">Carrinho (<span id="c-count">0</span>)</button>
-        <button class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 font-mono text-emerald-300" onclick="openWallet()">Carteira <span id="w-bal">R$ 0,00</span></button>
+      <button id="menu-toggle" type="button" aria-expanded="false" aria-controls="menu-panel" onclick="toggleMenu()" class="rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-lg" aria-label="Abrir menu">☰</button>
+      <nav id="menu-panel" hidden class="absolute right-4 top-20 z-30 grid min-w-48 gap-2 rounded-xl border border-slate-700 bg-slate-900 p-3 text-xs font-semibold shadow-xl sm:right-[calc((100%-72rem)/2+1rem)]" aria-label="Abas principais">
+        <button class="rounded-xl bg-indigo-600 px-3 py-2 text-left hover:bg-indigo-500" onclick="setView('shop');toggleMenu(false)">Loja</button>
+        <button class="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-left text-amber-300" onclick="setView('check');toggleMenu(false)">Analisador</button>
+        <button class="rounded-xl bg-slate-800 px-3 py-2 text-left hover:bg-slate-700" onclick="openWallet();toggleMenu(false)">Carteira</button>
+        <button class="rounded-xl bg-slate-800 px-3 py-2 text-left hover:bg-slate-700" onclick="openModal('adsterra-modal');toggleMenu(false)">Ganhos Adsterra</button>
+        <button class="rounded-xl bg-slate-800 px-3 py-2 text-left hover:bg-slate-700" onclick="openModal('currency-modal');loadRates();toggleMenu(false)">Conversor de moedas</button>
+        <button class="rounded-xl bg-slate-800 px-3 py-2 hover:bg-slate-700" onclick="openModal('add-modal');toggleMenu(false)">+ Produto</button>
+        <button class="rounded-xl bg-slate-800 px-3 py-2 hover:bg-slate-700" onclick="openAccount();toggleMenu(false)">Conta</button>
+        <button class="rounded-xl bg-slate-800 px-3 py-2 hover:bg-slate-700" onclick="openModal('currency-modal');loadRates();toggleMenu(false)">Câmbio</button>
+        <button class="rounded-xl bg-slate-800 px-3 py-2 hover:bg-slate-700" onclick="openModal('keys-modal');renderKeys();toggleMenu(false)">Keys (<span id="k-count">0</span>)</button>
+        <button class="rounded-xl bg-cyan-700 px-3 py-2 hover:bg-cyan-600" onclick="openModal('cart-modal');renderCart();toggleMenu(false)">Carrinho (<span id="c-count">0</span>)</button>
+        <button class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 font-mono text-emerald-300" onclick="openWallet();toggleMenu(false)">Carteira <span id="w-bal">R$ 0,00</span></button>
       </nav>
     </header>
 
@@ -115,7 +119,18 @@
     </div>
   </div>
 
-  <div id="add-modal" class="modal fixed inset-0 z-40 hidden items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-labelledby="add-title">
+
+  <div id="adsterra-modal" class="modal fixed inset-0 z-40 hidden items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-labelledby="adsterra-title">
+    <div class="w-full max-w-md space-y-4 rounded-2xl border border-slate-800 bg-slate-900 p-5">
+      <div class="flex items-center justify-between"><h2 id="adsterra-title" class="font-bold">Ganhos Adsterra</h2><button onclick="closeModal('adsterra-modal')" aria-label="Fechar" class="text-slate-400">✕</button></div>
+      <p class="text-xs text-amber-200">Registre manualmente os valores exibidos no seu painel Adsterra. Isto não conecta à sua conta nem importa pagamentos automaticamente.</p>
+      <label class="block text-xs">Valor recebido / estimado em USD<input id="adsterra-amount" type="number" min="0.01" step="0.01" max="9999999" placeholder="0.00" class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5"></label>
+      <label class="block text-xs">Descrição<input id="adsterra-description" maxlength="100" value="Ganhos Adsterra" class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5"></label>
+      <button onclick="recordAdsterra()" class="w-full rounded-xl bg-emerald-600 py-2.5 text-xs font-bold">Registrar ganho</button>
+      <div id="adsterra-summary" class="rounded-xl border border-slate-800 bg-slate-950 p-3 text-xs text-slate-300">Total registrado: US$ 0,00</div>
+    </div>
+  </div>
+\n  <div id="add-modal" class="modal fixed inset-0 z-40 hidden items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-labelledby="add-title">
     <form id="add-form" class="w-full max-w-md space-y-3 rounded-2xl border border-slate-800 bg-slate-900 p-5 text-xs" onsubmit="addItem(event)">
       <div class="flex items-center justify-between"><h2 id="add-title" class="text-sm font-bold">Novo produto</h2><button type="button" onclick="closeModal('add-modal')" aria-label="Fechar" class="text-slate-400">✕</button></div>
       <label class="block">Nome<input id="n-name" required maxlength="80" class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5"></label>
@@ -177,9 +192,22 @@ document.querySelectorAll('.modal').forEach(modal=>{
   modal.addEventListener('click',event=>{if(event.target===modal)closeModal(modal.id);});
 });
 document.addEventListener('keydown',event=>{if(event.key==='Escape')document.querySelectorAll('.modal:not(.hidden)').forEach(modal=>closeModal(modal.id));});
+function toggleMenu(force){const panel=document.getElementById('menu-panel');const button=document.getElementById('menu-toggle');const show=typeof force==='boolean'?force:panel.hidden;panel.hidden=!show;button.setAttribute('aria-expanded',String(show));}
+function recordAdsterra(){
+  const amount=Number(document.getElementById('adsterra-amount').value);
+  const description=document.getElementById('adsterra-description').value.trim()||'Ganhos Adsterra';
+  if(!Number.isFinite(amount)||amount<=0||amount>9999999){toast('Informe um valor em dólar válido.');return;}
+  S.tx.unshift({label:description,gross:amount,net:amount,currency:'USD',date:new Date().toISOString(),source:'adsterra'});
+  S.adsterraTotal=Number(((S.adsterraTotal||0)+amount).toFixed(2));
+  document.getElementById('adsterra-summary').textContent='Total registrado: '+S.adsterraTotal.toLocaleString('en-US',{style:'currency',currency:'USD'});
+  document.getElementById('adsterra-amount').value='';
+  persist();toast('Ganho registrado no histórico local.');
+}
 function setView(view){
   document.getElementById('view-shop').classList.toggle('hidden',view!=='shop');
   document.getElementById('view-check').classList.toggle('hidden',view!=='check');
+  if(view==='shop')document.getElementById('view-shop').scrollIntoView({behavior:'smooth',block:'start'});
+  if(view==='check')document.getElementById('view-check').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function renderShop(){
   const categories=['Todos','Executor','Script Hub','Combo'];
@@ -251,6 +279,8 @@ function openWallet(){
   document.getElementById('w-gross').textContent=brl(S.gross);document.getElementById('w-net').textContent=brl(S.net);document.getElementById('w-cash').textContent=brl(S.cash);
   document.getElementById('w-tx').innerHTML=S.tx.length?S.tx.map(row=>'<div class="flex justify-between gap-3 rounded-lg bg-slate-950 p-3"><span class="min-w-0">'+safeText(row.label)+'<small class="block text-slate-500">'+new Date(row.date).toLocaleString('pt-BR')+'</small></span><span class="shrink-0 font-mono '+(row.out?'text-amber-300':'text-emerald-300')+'">'+(row.out?'-':'+')+brl(row.net??row.out)+'</span></div>').join(''):'<p class="py-6 text-center text-slate-400">Nenhum registro.</p>';
   openModal('wallet-modal');
+  const adSummary=document.getElementById('adsterra-summary');
+  if(adSummary)adSummary.textContent='Total registrado: '+Number(S.adsterraTotal||0).toLocaleString('en-US',{style:'currency',currency:'USD'});
 }
 function withdraw(){
   if(S.cash<=0){toast('Não há saldo para retirar.');return;}
