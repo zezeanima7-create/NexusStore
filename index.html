@@ -37,23 +37,17 @@
       <strong>Modo demonstração:</strong> o catálogo, carrinho e geração de keys são locais. Não há pagamento real nem validação de licença em servidor.
     </div>
 
-    <section class="relative isolate overflow-hidden rounded-2xl border border-indigo-400/20 bg-slate-900">
-      <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1600&q=85" alt="Código de programação em uma tela" class="absolute inset-0 -z-20 h-full w-full object-cover opacity-35" onerror="this.style.display='none'">
-      <div class="absolute inset-0 -z-10 bg-gradient-to-r from-slate-950 via-slate-950/85 to-indigo-950/50"></div>
+    <section class="relative overflow-hidden rounded-2xl border border-indigo-400/20 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950">
       <div class="max-w-2xl space-y-3 p-6 sm:p-9">
-        <p class="text-xs font-bold uppercase tracking-[.25em] text-cyan-300">NexusStore</p>
-        <h1 class="text-3xl font-black tracking-tight sm:text-4xl">Scripts e Keys para seus projetos</h1>
-        <p class="max-w-xl text-sm leading-relaxed text-slate-200">Encontre scripts digitais, sistemas e interfaces para projetos no Roblox Studio. Consulte os produtos, escolha um plano e veja as licenças de demonstração.</p>
-        <button onclick="setView('shop')" class="rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold hover:bg-indigo-500">Ver scripts</button>
+        <p class="text-xs font-bold uppercase tracking-[.25em] text-cyan-300">NexusStore · catálogo do criador</p>
+        <h1 class="text-3xl font-black tracking-tight sm:text-4xl">Sua loja de scripts e Keys</h1>
+        <p class="max-w-xl text-sm leading-relaxed text-slate-200">Você cria os produtos e define os planos. A vitrine mostra os scripts cadastrados; a capa é buscada automaticamente pelo nome do jogo informado.</p>
+        <button onclick="setView('shop')" class="rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold hover:bg-indigo-500">Ver catálogo</button>
       </div>
     </section>
-    <section class="space-y-3">
-      <div><h2 class="text-lg font-bold">Recomendados</h2><p class="text-xs text-slate-400">Scripts e recursos digitais disponíveis no catálogo.</p></div>
-      <div class="grid gap-3 sm:grid-cols-3">
-        <article class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900"><img src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?auto=format&fit=crop&w=800&q=80" alt="Código de programação" class="h-28 w-full object-cover" onerror="this.style.display='none'"><div class="space-y-1 p-3"><h3 class="text-sm font-bold">Scripts de gameplay</h3><p class="text-xs text-slate-400">Sistemas e mecânicas para projetos próprios no Studio.</p></div></article>
-        <article class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900"><img src="https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=800&q=80" alt="Editor de código" class="h-28 w-full object-cover"><div class="space-y-1 p-3"><h3 class="text-sm font-bold">Sistemas e módulos</h3><p class="text-xs text-slate-400">Componentes reutilizáveis para experiências Roblox.</p></div></article>
-        <article class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900"><img src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&q=80" alt="Código em monitor" class="h-28 w-full object-cover"><div class="space-y-1 p-3"><h3 class="text-sm font-bold">Interfaces e HUDs</h3><p class="text-xs text-slate-400">Elementos de interface para projetos no Roblox Studio.</p></div></article>
-      </div>
+    <section class="rounded-xl border border-slate-800 bg-slate-900 p-4">
+      <h2 class="text-sm font-bold">Produtos criados por você</h2>
+      <p class="mt-1 text-xs leading-relaxed text-slate-400">Esta vitrine não recebe anúncios de produtos dos clientes. Use o cadastro de produto para adicionar seus próprios scripts e configurar os preços.</p>
     </section>
     <section id="view-shop" class="space-y-4">
       <div class="flex flex-wrap items-center justify-between gap-3">
@@ -152,9 +146,9 @@
     <form id="add-form" class="w-full max-w-md space-y-3 rounded-2xl border border-slate-800 bg-slate-900 p-5 text-xs" onsubmit="addItem(event)">
       <div class="flex items-center justify-between"><h2 id="add-title" class="text-sm font-bold">Novo produto</h2><button type="button" onclick="closeModal('add-modal')" aria-label="Fechar" class="text-slate-400">✕</button></div>
       <label class="block">Nome<input id="n-name" required maxlength="80" class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5"></label>
-      <label class="block">Jogo / categoria<input id="n-game" required maxlength="60" value="Universal" class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5"></label>
-      <label class="block">Tipo<select id="n-cat" class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5"><option>Scripts</option><option>Sistemas</option><option>Interfaces</option></select></label>
-      <label class="block">URL da imagem (opcional)<input id="n-img" type="url" maxlength="500" placeholder="https://..." class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5"></label>
+      <label class="block">Jogo do produto<input id="n-game" required maxlength="60" value="Roblox Studio" placeholder="Ex.: nome da experiência no Roblox" class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5"></label>
+      <label class="block">Categoria<select id="n-cat" class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5"><option>Scripts</option><option>Sistemas</option><option>Interfaces</option></select></label>
+      <p class="rounded-lg bg-slate-950 p-2 text-[11px] leading-relaxed text-slate-400">A capa será procurada automaticamente usando o nome do jogo. Não precisa enviar imagem nem URL.</p>
       <div class="grid grid-cols-3 gap-2">
         <label>7 dias<input id="p-7" type="number" min="0.01" max="999999" step="0.01" value="14.90" required class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2"></label>
         <label>30 dias<input id="p-30" type="number" min="0.01" max="999999" step="0.01" value="34.90" required class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2"></label>
@@ -169,6 +163,38 @@
 const STORAGE_KEY = 'nexusstore-demo-v2';
 const brl = value => Number(value || 0).toLocaleString('pt-BR', {style:'currency',currency:'BRL'});
 const fallbackImage = text => 'https://placehold.co/600x240/0f172a/38bdf8?text=' + encodeURIComponent(text || 'NexusStore');
+const gameImageRequests = new Set();
+function generatedGameCover(game){
+  const title=String(game||'Jogo').slice(0,42);
+  const svg='<svg xmlns="http://www.w3.org/2000/svg" width="900" height="420" viewBox="0 0 900 420"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#312e81"/><stop offset="1" stop-color="#0f172a"/></linearGradient></defs><rect width="900" height="420" fill="url(#g)"/><circle cx="760" cy="80" r="190" fill="#6366f1" opacity=".22"/><text x="54" y="185" fill="#67e8f9" font-family="Arial,sans-serif" font-size="25" font-weight="700">NEXUSSTORE · JOGO</text><text x="54" y="255" fill="white" font-family="Arial,sans-serif" font-size="48" font-weight="800">'+title.replace(/[&<>]/g,'')+'</text><text x="54" y="315" fill="#cbd5e1" font-family="Arial,sans-serif" font-size="22">Imagem automática do catálogo</text></svg>';
+  return 'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg);
+}
+async function resolveGameImage(item){
+  if(!item||item.img||gameImageRequests.has(item.id))return;
+  gameImageRequests.add(item.id);
+  try{
+    const searchUrl='https://games.roblox.com/v1/games/list?model.keyword='+encodeURIComponent(item.game)+'&model.maxRows=10&model.startRows=0';
+    const searchResponse=await fetch(searchUrl);
+    if(!searchResponse.ok)throw new Error('Busca de jogos indisponível');
+    const searchData=await searchResponse.json();
+    const games=Array.isArray(searchData.games)?searchData.games:[];
+    const match=games.find(game=>String(game.name||'').toLowerCase()===String(item.game).toLowerCase())||games[0];
+    const universeId=match?.universeId||match?.universeID;
+    if(!universeId)throw new Error('Jogo não encontrado');
+    const iconResponse=await fetch('https://thumbnails.roblox.com/v1/games/icons?universeIds='+encodeURIComponent(universeId)+'&size=512x512&format=Png&isCircular=false');
+    if(!iconResponse.ok)throw new Error('Capa indisponível');
+    const iconData=await iconResponse.json();
+    const imageUrl=iconData.data?.[0]?.imageUrl;
+    if(imageUrl&&/^https:\/\//i.test(imageUrl)){
+      item.img=imageUrl;
+      persist();
+      const card=document.querySelector('[data-product-id="'+CSS.escape(item.id)+'"] img');
+      if(card)card.src=imageUrl;
+    }
+  }catch(error){
+    console.info('Usando capa gerada para '+item.game+'.',error);
+  }
+}
 const safeText = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const makeId = () => 'item-' + (crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2));
 const makeKey = prefix => {
@@ -177,9 +203,9 @@ const makeKey = prefix => {
   return prefix + Array.from(bytes, b => b.toString(16).padStart(2,'0')).join('').toUpperCase();
 };
 const defaultItems = [
-  {id:'script-gameplay',name:'Sistema de gameplay para Roblox Studio',game:'Roblox Studio',cat:'Scripts',img:fallbackImage('ROBLOX STUDIO SCRIPT'),plans:[['7 dias',14.90],['30 dias',34.90],['VIP',79.90]]},
-  {id:'module-system',name:'Módulos e sistemas reutilizáveis',game:'Roblox Studio',cat:'Sistemas',img:fallbackImage('ROBLOX MODULES'),plans:[['7 dias',12.90],['30 dias',29.90],['VIP',69.90]]},
-  {id:'hud-interface',name:'Interface HUD para projetos próprios',game:'Roblox Studio',cat:'Interfaces',img:fallbackImage('ROBLOX HUD'),plans:[['7 dias',9.90],['30 dias',24.90],['VIP',59.90]]}
+  {id:'script-gameplay',name:'Sistema de gameplay para Roblox Studio',game:'Roblox Studio',cat:'Scripts',img:'',plans:[['7 dias',14.90],['30 dias',34.90],['VIP',79.90]]},
+  {id:'module-system',name:'Módulos e sistemas reutilizáveis',game:'Roblox Studio',cat:'Sistemas',img:'',plans:[['7 dias',12.90],['30 dias',29.90],['VIP',69.90]]},
+  {id:'hud-interface',name:'Interface HUD para projetos próprios',game:'Roblox Studio',cat:'Interfaces',img:'',plans:[['7 dias',9.90],['30 dias',24.90],['VIP',59.90]]>
 ];
 const freshState = () => ({cat:'Todos',game:'Todos',fee:0.05,cash:0,gross:0,net:0,tx:[],adsterraEntries:[],cart:[],keys:[],selected:{},items:defaultItems});
 function loadState(){
@@ -236,9 +262,10 @@ function renderShop(){
   document.getElementById('grid').innerHTML=visible.map(item=>{
     const index=Math.min(Number(S.selected[item.id]||0),item.plans.length-1);
     const plan=item.plans[index]||item.plans[0];
-    const image=validImage(item.img)?item.img:fallbackImage(item.game);
-    return '<article class="flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-800 bg-slate-900"><div><img src="'+safeText(image)+'" alt="Imagem de '+safeText(item.name)+'" loading="lazy" class="h-36 w-full object-cover" onerror="this.onerror=null;this.src=&quot;https://placehold.co/600x240/0f172a/38bdf8?text=NexusStore&quot;"><div class="space-y-3 p-4"><div class="flex justify-between gap-2 text-[11px] text-cyan-300"><span>'+safeText(item.game)+'</span><span>'+safeText(item.cat)+'</span></div><h2 class="font-bold">'+safeText(item.name)+'</h2><div class="grid grid-cols-'+item.plans.length+' gap-1 rounded-xl bg-slate-950 p-1">'+item.plans.map((p,i)=>'<button onclick="S.selected['+JSON.stringify(item.id)+']='+i+';renderShop()" class="rounded-lg py-1.5 text-[11px] '+(i===index?'bg-indigo-600 text-white':'text-slate-400')+'">'+safeText(p[0])+'</button>').join('')+'</div></div></div><div class="flex items-center justify-between px-4 pb-4"><span class="font-mono text-sm font-bold">'+brl(plan[1])+'</span><button onclick="addCart('+JSON.stringify(item.id)+','+index+')" class="rounded-xl bg-indigo-600 px-3 py-2 text-xs font-semibold hover:bg-indigo-500">Adicionar</button></div></article>';
+    const image=validImage(item.img)?item.img:generatedGameCover(item.game);
+    return '<article data-product-id="'+safeText(item.id)+'" class="flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-800 bg-slate-900"><div><img src="'+safeText(image)+'" alt="Capa do jogo '+safeText(item.game)+'" loading="lazy" class="h-36 w-full object-cover" onerror="this.onerror=null;this.src=&quot;'+fallbackImage('NexusStore')+'&quot;"><div class="space-y-3 p-4"><div class="flex justify-between gap-2 text-[11px] text-cyan-300"><span>'+safeText(item.game)+'</span><span>'+safeText(item.cat)+'</span></div><h2 class="font-bold">'+safeText(item.name)+'</h2><div class="grid grid-cols-'+item.plans.length+' gap-1 rounded-xl bg-slate-950 p-1">'+item.plans.map((p,i)=>'<button onclick="S.selected['+JSON.stringify(item.id)+']='+i+';renderShop()" class="rounded-lg py-1.5 text-[11px] '+(i===index?'bg-indigo-600 text-white':'text-slate-400')+'">'+safeText(p[0])+'</button>').join('')+'</div></div></div><div class="flex items-center justify-between px-4 pb-4"><span class="font-mono text-sm font-bold">'+brl(plan[1])+'</span><button onclick="addCart('+JSON.stringify(item.id)+','+index+')" class="rounded-xl bg-indigo-600 px-3 py-2 text-xs font-semibold hover:bg-indigo-500">Adicionar</button></div></article>';
   }).join('');
+  S.items.forEach(item=>{if(!validImage(item.img))resolveGameImage(item);});
   updateCounts();persist();
 }
 function validImage(url){
@@ -249,12 +276,11 @@ function addItem(event){
   const name=document.getElementById('n-name').value.trim();
   const game=document.getElementById('n-game').value.trim();
   const cat=document.getElementById('n-cat').value;
-  const rawImage=document.getElementById('n-img').value.trim();
   const prices=['p-7','p-30','p-life'].map(id=>Number(document.getElementById(id).value));
   if(!name||!game||prices.some(price=>!Number.isFinite(price)||price<=0||price>999999)){toast('Preencha os campos e informe preços válidos.');return;}
-  if(rawImage&&!validImage(rawImage)){toast('A imagem precisa usar uma URL HTTP ou HTTPS válida.');return;}
-  S.items.unshift({id:makeId(),name,game,cat,img:rawImage||fallbackImage(game),plans:[['7 dias',prices[0]],['30 dias',prices[1]],['VIP',prices[2]]]});
-  document.getElementById('add-form').reset();closeModal('add-modal');renderShop();toast('Produto adicionado.');
+  const product={id:makeId(),name,game,cat,img:'',plans:[['7 dias',prices[0]],['30 dias',prices[1]],['VIP',prices[2]]]};
+  S.items.unshift(product);
+  document.getElementById('add-form').reset();closeModal('add-modal');renderShop();resolveGameImage(product);toast('Produto adicionado; procurando a capa do jogo.');
 }
 function addCart(id,index){
   const item=S.items.find(product=>product.id===id);
