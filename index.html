@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="NexusStore — catálogo demonstrativo de produtos digitais.">
+  <meta name="description" content="NexusStore — loja de scripts digitais e licenças.">
   <meta name="theme-color" content="#020617">
-  <title>NexusStore — Produtos digitais</title>
+  <title>NexusStore — Scripts e Keys</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>tailwind.config = { darkMode: 'class' };</script>
   <style>
@@ -15,9 +15,9 @@
 </head>
 <body class="min-h-screen bg-slate-950 p-4 font-sans text-slate-100 sm:p-6">
   <main class="mx-auto max-w-6xl space-y-6">
-    <header class="relative flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-800 bg-slate-900 p-4">
+    <header class="relative flex flex-wrap items-center justify-start gap-3 rounded-2xl border border-slate-800 bg-slate-900 p-4">
+      <button id="menu-toggle" type="button" aria-expanded="false" aria-controls="menu-panel" onclick="toggleMenu()" class="rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-2xl leading-none" aria-label="Abrir menu">⋮</button>
       <a href="#" class="text-lg font-extrabold" aria-label="NexusStore início">Nexus<span class="text-indigo-400">Store</span></a>
-      <button id="menu-toggle" type="button" aria-expanded="false" aria-controls="menu-panel" onclick="toggleMenu()" class="rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-lg" aria-label="Abrir menu">⋮</button>
       <nav id="menu-panel" hidden class="absolute left-0 top-full z-30 mt-2 grid min-w-48 gap-2 rounded-xl border border-slate-700 bg-slate-900 p-3 text-xs font-semibold shadow-xl sm:left-4" aria-label="Abas principais">
         <button class="rounded-xl bg-indigo-600 px-3 py-2 text-left hover:bg-indigo-500" onclick="setView('shop');toggleMenu(false)">Loja</button>
         <button class="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-left text-amber-300" onclick="setView('check');toggleMenu(false)">Analisador</button>
@@ -34,31 +34,31 @@
     </header>
 
     <div class="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs leading-relaxed text-amber-200">
-      <strong>Modo demonstração:</strong> este projeto não processa pagamentos nem valida licenças em servidor. Vendas e keys geradas aqui são registros locais de teste e não representam transações reais.
+      <strong>Modo demonstração:</strong> o catálogo, carrinho e geração de keys são locais. Não há pagamento real nem validação de licença em servidor.
     </div>
 
     <section class="relative isolate overflow-hidden rounded-2xl border border-indigo-400/20 bg-slate-900">
-      <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1600&q=85" alt="Ambiente gamer com iluminação e computadores" class="absolute inset-0 -z-20 h-full w-full object-cover opacity-35" onerror="this.style.display='none'">
+      <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1600&q=85" alt="Código de programação em uma tela" class="absolute inset-0 -z-20 h-full w-full object-cover opacity-35" onerror="this.style.display='none'">
       <div class="absolute inset-0 -z-10 bg-gradient-to-r from-slate-950 via-slate-950/85 to-indigo-950/50"></div>
       <div class="max-w-2xl space-y-3 p-6 sm:p-9">
         <p class="text-xs font-bold uppercase tracking-[.25em] text-cyan-300">NexusStore</p>
-        <h1 class="text-3xl font-black tracking-tight sm:text-4xl">Bem-vindo à NexusStore</h1>
-        <p class="max-w-xl text-sm leading-relaxed text-slate-200">Encontre produtos digitais, confira as recomendações e explore a loja. Esta versão é uma demonstração: não realiza pagamentos nem entrega licenças reais.</p>
-        <button onclick="setView('shop')" class="rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold hover:bg-indigo-500">Explorar produtos</button>
+        <h1 class="text-3xl font-black tracking-tight sm:text-4xl">Scripts e Keys para seus projetos</h1>
+        <p class="max-w-xl text-sm leading-relaxed text-slate-200">Encontre scripts digitais, sistemas e interfaces para projetos no Roblox Studio. Consulte os produtos, escolha um plano e veja as licenças de demonstração.</p>
+        <button onclick="setView('shop')" class="rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold hover:bg-indigo-500">Ver scripts</button>
       </div>
     </section>
     <section class="space-y-3">
-      <div><h2 class="text-lg font-bold">Recomendados</h2><p class="text-xs text-slate-400">Sugestões digitais para personalizar e organizar seu espaço gamer.</p></div>
+      <div><h2 class="text-lg font-bold">Recomendados</h2><p class="text-xs text-slate-400">Scripts e recursos digitais disponíveis no catálogo.</p></div>
       <div class="grid gap-3 sm:grid-cols-3">
-        <article class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900"><img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80" alt="Arte digital abstrata para wallpapers" class="h-28 w-full object-cover"><div class="space-y-1 p-3"><h3 class="text-sm font-bold">Pack de wallpapers gamer</h3><p class="text-xs text-slate-400">Coleção visual para personalizar seu desktop.</p></div></article>
-        <article class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900"><img src="https://images.unsplash.com/photo-1593305841991-05c297ba4575?auto=format&fit=crop&w=800&q=80" alt="Equipamentos de computador e setup" class="h-28 w-full object-cover"><div class="space-y-1 p-3"><h3 class="text-sm font-bold">Kit de overlays para stream</h3><p class="text-xs text-slate-400">Elementos gráficos para organizar suas transmissões.</p></div></article>
-        <article class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900"><img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80" alt="Mesa de trabalho com computador" class="h-28 w-full object-cover"><div class="space-y-1 p-3"><h3 class="text-sm font-bold">Guia de setup e desempenho</h3><p class="text-xs text-slate-400">Dicas de organização e configuração do computador.</p></div></article>
+        <article class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900"><img src="https://images.unsplash.com/photo-155594 anytime?auto=format&fit=crop&w=800&q=80" alt="Código de programação" class="h-28 w-full object-cover" onerror="this.style.display='none'"><div class="space-y-1 p-3"><h3 class="text-sm font-bold">Scripts de gameplay</h3><p class="text-xs text-slate-400">Sistemas e mecânicas para projetos próprios no Studio.</p></div></article>
+        <article class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900"><img src="https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=800&q=80" alt="Editor de código" class="h-28 w-full object-cover"><div class="space-y-1 p-3"><h3 class="text-sm font-bold">Sistemas e módulos</h3><p class="text-xs text-slate-400">Componentes reutilizáveis para experiências Roblox.</p></div></article>
+        <article class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900"><img src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&q=80" alt="Código em monitor" class="h-28 w-full object-cover"><div class="space-y-1 p-3"><h3 class="text-sm font-bold">Interfaces e HUDs</h3><p class="text-xs text-slate-400">Elementos de interface para projetos no Roblox Studio.</p></div></article>
       </div>
     </section>
     <section id="view-shop" class="space-y-4">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div id="cats" class="flex flex-wrap gap-2"></div>
-        <label class="text-xs text-slate-400">Jogo
+        <label class="text-xs text-slate-400">Plataforma
           <select id="game-sel" class="ml-2 rounded-xl border border-slate-800 bg-slate-900 px-3 py-2 text-slate-100" onchange="S.game=this.value;renderShop()">
             <option value="Todos">Todos</option>
           </select>
@@ -153,7 +153,7 @@
       <div class="flex items-center justify-between"><h2 id="add-title" class="text-sm font-bold">Novo produto</h2><button type="button" onclick="closeModal('add-modal')" aria-label="Fechar" class="text-slate-400">✕</button></div>
       <label class="block">Nome<input id="n-name" required maxlength="80" class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5"></label>
       <label class="block">Jogo / categoria<input id="n-game" required maxlength="60" value="Universal" class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5"></label>
-      <label class="block">Tipo<select id="n-cat" class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5"><option>Ferramentas Studio</option><option>Aprendizado Lua</option><option>Personalização</option></select></label>
+      <label class="block">Tipo<select id="n-cat" class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5"><option>Scripts</option><option>Sistemas</option><option>Interfaces</option></select></label>
       <label class="block">URL da imagem (opcional)<input id="n-img" type="url" maxlength="500" placeholder="https://..." class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5"></label>
       <div class="grid grid-cols-3 gap-2">
         <label>7 dias<input id="p-7" type="number" min="0.01" max="999999" step="0.01" value="14.90" required class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2"></label>
@@ -189,7 +189,7 @@ function loadState(){
     const saved = JSON.parse(raw);
     const base = freshState();
     if (!saved || typeof saved !== 'object') return base;
-    return {...base,...saved,items:Array.isArray(saved.items)?saved.items.filter(item=>item&& !['Executor','Script Hub','Combo'].includes(item.cat) && !/executor|\\bESP\\b|exploit/i.test(String(item.name||''))):base.items,cart:Array.isArray(saved.cart)?saved.cart:[],keys:Array.isArray(saved.keys)?saved.keys:[],tx:Array.isArray(saved.tx)?saved.tx:[],adsterraEntries:Array.isArray(saved.adsterraEntries)?saved.adsterraEntries:[],selected:saved.selected && typeof saved.selected==='object'?saved.selected:{}};
+    return {...base,...saved,items:(()=>{const rows=Array.isArray(saved.items)?saved.items.filter(item=>item&&!['studio-ui','lua-learning','studio-custom'].includes(item.id)&&!['Executor','Script Hub','Combo','Ferramentas Studio','Aprendizado Lua','Personalização'].includes(item.cat)&&!/executor|\\bESP\\b|exploit/i.test(String(item.name||''))):[];return rows.length?rows:base.items;})(),cart:Array.isArray(saved.cart)?saved.cart:[],keys:Array.isArray(saved.keys)?saved.keys:[],tx:Array.isArray(saved.tx)?saved.tx:[],adsterraEntries:Array.isArray(saved.adsterraEntries)?saved.adsterraEntries:[],selected:saved.selected && typeof saved.selected==='object'?saved.selected:{}};
   } catch (error) { console.warn('Não foi possível carregar os dados locais.',error); return freshState(); }
 }
 const S = loadState();
@@ -225,7 +225,7 @@ function setView(view){
   if(view==='check')document.getElementById('view-check').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function renderShop(){
-  const categories=['Todos','Ferramentas Studio','Aprendizado Lua','Personalização'];
+  const categories=['Todos','Scripts','Sistemas','Interfaces'];
   document.getElementById('cats').innerHTML=categories.map(cat=>'<button onclick="S.cat='+JSON.stringify(cat)+';renderShop()" class="rounded-xl px-3 py-1.5 text-xs font-semibold '+(S.cat===cat?'bg-indigo-600':'border border-slate-800 bg-slate-900 text-slate-300')+'">'+safeText(cat)+'</button>').join('');
   const games=['Todos',...new Set(S.items.map(item=>item.game))];
   const select=document.getElementById('game-sel');
