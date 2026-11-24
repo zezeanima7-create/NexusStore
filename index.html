@@ -24,7 +24,7 @@
         <button class="rounded-xl bg-slate-800 px-3 py-2 text-left hover:bg-slate-700" onclick="openWallet();toggleMenu(false)">Carteira</button>
         <button class="rounded-xl bg-slate-800 px-3 py-2 text-left hover:bg-slate-700" onclick="openModal('adsterra-modal');toggleMenu(false)">Ganhos Adsterra</button>
         <button class="rounded-xl bg-slate-800 px-3 py-2 text-left hover:bg-slate-700" onclick="openModal('currency-modal');loadRates();toggleMenu(false)">Conversor de moedas</button>
-        <button class="rounded-xl bg-slate-800 px-3 py-2 hover:bg-slate-700" onclick="openModal('add-modal');toggleMenu(false)">+ Produto</button>
+        <button class="rounded-xl bg-slate-800 px-3 py-2 hover:bg-slate-700" onclick="openProductForm();toggleMenu(false)">+ Produto</button>
         <button class="rounded-xl bg-slate-800 px-3 py-2 hover:bg-slate-700" onclick="openAccount();toggleMenu(false)">Conta</button>
         <button class="rounded-xl bg-slate-800 px-3 py-2 hover:bg-slate-700" onclick="openModal('currency-modal');loadRates();toggleMenu(false)">Câmbio</button>
         <button class="rounded-xl bg-slate-800 px-3 py-2 hover:bg-slate-700" onclick="openModal('keys-modal');renderKeys();toggleMenu(false)">Keys (<span id="k-count">0</span>)</button>
@@ -108,12 +108,12 @@
   <div id="account-modal" class="modal fixed inset-0 z-40 hidden items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-labelledby="account-title">
     <div class="w-full max-w-md space-y-4 rounded-2xl border border-slate-800 bg-slate-900 p-5">
       <div class="flex items-center justify-between"><h2 id="account-title" class="font-bold">Conta NexusStore</h2><button onclick="closeModal('account-modal')" aria-label="Fechar" class="text-slate-400">✕</button></div>
-      <p class="text-xs leading-relaxed text-amber-200">Prévia visual: cadastro e login ainda não autenticam usuários nem protegem contas. Não informe senhas reais. Para produção é necessário um backend de autenticação seguro.</p>
-      <label class="block text-xs">Nome de exibição<input id="account-name" maxlength="40" autocomplete="nickname" class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5"></label>
+      <p id="account-status" class="text-xs text-slate-300" aria-live="polite">Entre para acessar sua conta.</p>
       <label class="block text-xs">E-mail<input id="account-email" type="email" maxlength="120" autocomplete="email" required class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5"></label>
-      <div class="flex gap-2"><button onclick="demoAccount('login')" class="flex-1 rounded-xl bg-indigo-600 py-2.5 text-xs font-bold">Entrar (prévia)</button><button onclick="demoAccount('register')" class="flex-1 rounded-xl bg-slate-700 py-2.5 text-xs font-bold">Cadastrar (prévia)</button></div>
-      <p id="account-status" class="text-xs text-slate-400" aria-live="polite">Nenhuma sessão ativa.</p>
-      <button onclick="logoutDemo()" class="w-full rounded-xl border border-slate-700 py-2 text-xs">Sair da prévia</button>
+      <label class="block text-xs">Senha<input id="account-password" type="password" minlength="8" maxlength="72" autocomplete="current-password" required class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5"></label>
+      <div class="flex gap-2"><button onclick="authAccount('login')" class="flex-1 rounded-xl bg-indigo-600 py-2.5 text-xs font-bold">Entrar</button><button onclick="authAccount('register')" class="flex-1 rounded-xl bg-slate-700 py-2.5 text-xs font-bold">Criar conta</button></div>
+      <button onclick="signOutAccount()" class="w-full rounded-xl border border-slate-700 py-2 text-xs">Sair</button>
+      <p class="text-[11px] leading-relaxed text-slate-500">O cadastro cria uma conta comum. O painel de produtos só aparece para a conta proprietária autorizada no banco. Nunca compartilhe sua senha.</p>
     </div>
   </div>
 
@@ -158,8 +158,16 @@
     </form>
   </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 'use strict';
+const SUPABASE_URL='https://ppbufhqdaanvgrkyisrd.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_NGXNqQ1rflxE0XRuhkZBKw__OrqJDan';
+const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+let currentUser=null,editingProductId=null;
+function isOwner(){return currentUser?.app_metadata?.role==='owner';}
+async function refreshAuth(){const {data,error}=await supabaseClient.auth.getSession();if(error)console.error(error);currentUser=data.session?.user||null;updateAccountUI();renderShop();}
+supabaseClient.auth.onAuthStateChange((_event,session)=>{currentUser=session?.user||null;updateAccountUI();setTimeout(()=>renderShop(),0);});
 const STORAGE_KEY = 'nexusstore-demo-v2';
 const brl = value => Number(value || 0).toLocaleString('pt-BR', {style:'currency',currency:'BRL'});
 const fallbackImage = text => 'https://placehold.co/600x240/0f172a/38bdf8?text=' + encodeURIComponent(text || 'NexusStore');
@@ -202,11 +210,7 @@ const makeKey = prefix => {
   crypto.getRandomValues(bytes);
   return prefix + Array.from(bytes, b => b.toString(16).padStart(2,'0')).join('').toUpperCase();
 };
-const defaultItems = [
-  {id:'script-gameplay',name:'Sistema de gameplay para Roblox Studio',game:'Roblox Studio',cat:'Scripts',img:'',plans:[['7 dias',14.90],['30 dias',34.90],['VIP',79.90]]},
-  {id:'module-system',name:'Módulos e sistemas reutilizáveis',game:'Roblox Studio',cat:'Sistemas',img:'',plans:[['7 dias',12.90],['30 dias',29.90],['VIP',69.90]]},
-  {id:'hud-interface',name:'Interface HUD para projetos próprios',game:'Roblox Studio',cat:'Interfaces',img:'',plans:[['7 dias',9.90],['30 dias',24.90],['VIP',59.90]]>
-];
+const defaultItems = [];
 const freshState = () => ({cat:'Todos',game:'Todos',fee:0.05,cash:0,gross:0,net:0,tx:[],adsterraEntries:[],cart:[],keys:[],selected:{},items:defaultItems});
 function loadState(){
   try {
@@ -250,37 +254,51 @@ function setView(view){
   if(view==='shop')document.getElementById('view-shop').scrollIntoView({behavior:'smooth',block:'start'});
   if(view==='check')document.getElementById('view-check').scrollIntoView({behavior:'smooth',block:'start'});
 }
-function renderShop(){
-  const categories=['Todos','Scripts','Sistemas','Interfaces'];
-  document.getElementById('cats').innerHTML=categories.map(cat=>'<button onclick="S.cat='+JSON.stringify(cat)+';renderShop()" class="rounded-xl px-3 py-1.5 text-xs font-semibold '+(S.cat===cat?'bg-indigo-600':'border border-slate-800 bg-slate-900 text-slate-300')+'">'+safeText(cat)+'</button>').join('');
-  const games=['Todos',...new Set(S.items.map(item=>item.game))];
-  const select=document.getElementById('game-sel');
-  if(!games.includes(S.game))S.game='Todos';
-  select.innerHTML=games.map(game=>'<option value="'+safeText(game)+'" '+(game===S.game?'selected':'')+'>'+safeText(game)+'</option>').join('');
-  const visible=S.items.filter(item=>(S.cat==='Todos'||item.cat===S.cat)&&(S.game==='Todos'||item.game===S.game));
-  document.getElementById('empty-shop').classList.toggle('hidden',visible.length>0);
-  document.getElementById('grid').innerHTML=visible.map(item=>{
-    const index=Math.min(Number(S.selected[item.id]||0),item.plans.length-1);
-    const plan=item.plans[index]||item.plans[0];
-    const image=validImage(item.img)?item.img:generatedGameCover(item.game);
-    return '<article data-product-id="'+safeText(item.id)+'" class="flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-800 bg-slate-900"><div><img src="'+safeText(image)+'" alt="Capa do jogo '+safeText(item.game)+'" loading="lazy" class="h-36 w-full object-cover" onerror="this.onerror=null;this.src=&quot;'+fallbackImage('NexusStore')+'&quot;"><div class="space-y-3 p-4"><div class="flex justify-between gap-2 text-[11px] text-cyan-300"><span>'+safeText(item.game)+'</span><span>'+safeText(item.cat)+'</span></div><h2 class="font-bold">'+safeText(item.name)+'</h2><div class="grid grid-cols-'+item.plans.length+' gap-1 rounded-xl bg-slate-950 p-1">'+item.plans.map((p,i)=>'<button onclick="S.selected['+JSON.stringify(item.id)+']='+i+';renderShop()" class="rounded-lg py-1.5 text-[11px] '+(i===index?'bg-indigo-600 text-white':'text-slate-400')+'">'+safeText(p[0])+'</button>').join('')+'</div></div></div><div class="flex items-center justify-between px-4 pb-4"><span class="font-mono text-sm font-bold">'+brl(plan[1])+'</span><button onclick="addCart('+JSON.stringify(item.id)+','+index+')" class="rounded-xl bg-indigo-600 px-3 py-2 text-xs font-semibold hover:bg-indigo-500">Adicionar</button></div></article>';
-  }).join('');
-  S.items.forEach(item=>{if(!validImage(item.img))resolveGameImage(item);});
-  updateCounts();persist();
+async function renderShop(){
+ const categories=['Todos','Scripts','Sistemas','Interfaces'];
+ document.getElementById('cats').innerHTML=categories.map(cat=>'<button onclick="S.cat='+JSON.stringify(cat)+';renderShop()" class="rounded-xl px-3 py-1.5 text-xs font-semibold '+(S.cat===cat?'bg-indigo-600':'border border-slate-800 bg-slate-900 text-slate-300')+'">'+safeText(cat)+'</button>').join('');
+ const grid=document.getElementById('grid');grid.innerHTML='<p class="col-span-full py-8 text-center text-xs text-slate-400">Carregando catálogo…</p>';
+ const {data,error}=await supabaseClient.from('products').select('id,name,game,category,image_url,plans,published,created_at').eq('published',true).order('created_at',{ascending:false});
+ if(error){console.error(error);grid.innerHTML='<p class="col-span-full py-8 text-center text-xs text-rose-300">Não foi possível carregar o catálogo.</p>';return;}
+ S.items=(data||[]).map(row=>({id:row.id,name:row.name,game:row.game,cat:row.category,img:row.image_url||'',plans:Array.isArray(row.plans)?row.plans:[]}));
+ const games=['Todos',...new Set(S.items.map(item=>item.game))],select=document.getElementById('game-sel');
+ if(!games.includes(S.game))S.game='Todos';
+ select.innerHTML=games.map(game=>'<option value="'+safeText(game)+'" '+(game===S.game?'selected':'')+'>'+safeText(game)+'</option>').join('');
+ const visible=S.items.filter(item=>(S.cat==='Todos'||item.cat===S.cat)&&(S.game==='Todos'||item.game===S.game));
+ document.getElementById('empty-shop').classList.toggle('hidden',visible.length>0);
+ grid.innerHTML=visible.map(item=>{
+  const index=Math.min(Number(S.selected[item.id]||0),Math.max(0,item.plans.length-1)),plan=item.plans[index]||item.plans[0]||['Indisponível',0],image=validImage(item.img)?item.img:generatedGameCover(item.game);
+  const actions=isOwner()?'<div class="flex gap-2 px-4 pb-4"><button onclick="editProduct('+JSON.stringify(item.id)+')" class="flex-1 rounded-lg border border-slate-700 py-2 text-xs">Editar</button><button onclick="deleteProduct('+JSON.stringify(item.id)+')" class="rounded-lg border border-rose-500/40 px-3 py-2 text-xs text-rose-300">Excluir</button></div>':'';
+  return '<article class="flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-800 bg-slate-900"><div><img src="'+safeText(image)+'" alt="Capa do jogo '+safeText(item.game)+'" loading="lazy" class="h-36 w-full object-cover"><div class="space-y-3 p-4"><div class="flex justify-between gap-2 text-[11px] text-cyan-300"><span>'+safeText(item.game)+'</span><span>'+safeText(item.cat)+'</span></div><h2 class="font-bold">'+safeText(item.name)+'</h2><div class="grid grid-cols-'+Math.max(1,item.plans.length)+' gap-1 rounded-xl bg-slate-950 p-1">'+item.plans.map((p,i)=>'<button onclick="S.selected['+JSON.stringify(item.id)+']='+i+';renderShop()" class="rounded-lg py-1.5 text-[11px] '+(i===index?'bg-indigo-600 text-white':'text-slate-400')+'">'+safeText(p[0])+'</button>').join('')+'</div></div></div><div class="flex items-center justify-between px-4 pb-4"><span class="font-mono text-sm font-bold">'+brl(plan[1])+'</span><button '+(!item.plans.length?'disabled':'')+' onclick="addCart('+JSON.stringify(item.id)+','+index+')" class="rounded-xl bg-indigo-600 px-3 py-2 text-xs font-semibold disabled:opacity-40">Adicionar</button></div>'+actions+'</article>';
+ }).join('');
+ S.items.forEach(item=>{if(!validImage(item.img))resolveGameImage(item);});updateCounts();
 }
 function validImage(url){
   try{const parsed=new URL(url);return parsed.protocol==='https:'||parsed.protocol==='http:';}catch{return false;}
 }
-function addItem(event){
-  event.preventDefault();
-  const name=document.getElementById('n-name').value.trim();
-  const game=document.getElementById('n-game').value.trim();
-  const cat=document.getElementById('n-cat').value;
-  const prices=['p-7','p-30','p-life'].map(id=>Number(document.getElementById(id).value));
-  if(!name||!game||prices.some(price=>!Number.isFinite(price)||price<=0||price>999999)){toast('Preencha os campos e informe preços válidos.');return;}
-  const product={id:makeId(),name,game,cat,img:'',plans:[['7 dias',prices[0]],['30 dias',prices[1]],['VIP',prices[2]]]};
-  S.items.unshift(product);
-  document.getElementById('add-form').reset();closeModal('add-modal');renderShop();resolveGameImage(product);toast('Produto adicionado; procurando a capa do jogo.');
+function openProductForm(id=null){
+ if(!isOwner()){toast('Acesso restrito à conta proprietária.');openAccount();return;}
+ editingProductId=id;const item=id?S.items.find(row=>row.id===id):null;
+ document.getElementById('add-title').textContent=item?'Editar produto':'Novo produto';
+ document.getElementById('n-name').value=item?.name||'';document.getElementById('n-game').value=item?.game||'';
+ document.getElementById('n-cat').value=item?.cat||'Scripts';
+ document.getElementById('p-7').value=item?.plans?.[0]?.[1]??14.90;document.getElementById('p-30').value=item?.plans?.[1]?.[1]??34.90;document.getElementById('p-life').value=item?.plans?.[2]?.[1]??79.90;openModal('add-modal');
+}
+function editProduct(id){openProductForm(id);}
+async function addItem(event){
+ event.preventDefault();if(!isOwner()){toast('Somente a proprietária pode salvar produtos.');return;}
+ const name=document.getElementById('n-name').value.trim(),game=document.getElementById('n-game').value.trim(),category=document.getElementById('n-cat').value,prices=['p-7','p-30','p-life'].map(id=>Number(document.getElementById(id).value));
+ if(!name||!game||prices.some(price=>!Number.isFinite(price)||price<=0||price>999999)){toast('Preencha os campos e informe preços válidos.');return;}
+ const existing=editingProductId?S.items.find(row=>row.id===editingProductId):null;
+ const payload={name,game,category,image_url:existing?.img||null,plans:[['7 dias',prices[0]],['30 dias',prices[1]],['VIP',prices[2]]],published:true};
+ const query=editingProductId?supabaseClient.from('products').update(payload).eq('id',editingProductId):supabaseClient.from('products').insert(payload);
+ const {error}=await query;if(error){console.error(error);toast('Não foi possível salvar. Verifique sua autorização.');return;}
+ editingProductId=null;document.getElementById('add-form').reset();closeModal('add-modal');await renderShop();toast('Produto salvo no catálogo online.');
+}
+async function deleteProduct(id){
+ if(!isOwner()||!confirm('Excluir este produto do catálogo?'))return;
+ const {error}=await supabaseClient.from('products').delete().eq('id',id);if(error){console.error(error);toast('Não foi possível excluir.');return;}
+ await renderShop();toast('Produto excluído.');
 }
 function addCart(id,index){
   const item=S.items.find(product=>product.id===id);
@@ -350,27 +368,23 @@ function updateCounts(){
   document.getElementById('k-count').textContent=S.keys.length;
   document.getElementById('w-bal').textContent=brl(S.cash);
 }
-// A autenticação abaixo é apenas uma prévia de interface; não armazena credenciais.
-let demoSession = null;
-let fxRates = null;
-let fxDate = '';
-const fxCurrencies = ['USD','BRL','EUR','GBP'];
-function openAccount(){
-  const status=document.getElementById('account-status');
-  status.textContent=demoSession?'Prévia ativa: '+demoSession.email:'Nenhuma sessão ativa.';
-  openModal('account-modal');
+function updateAccountUI(){
+ const status=document.getElementById('account-status');
+ if(status)status.textContent=currentUser?'Conectado: '+currentUser.email+(isOwner()?' · Proprietária':' · Conta de cliente'):'Nenhuma sessão ativa.';
+ const addButton=[...document.querySelectorAll('#menu-panel button')].find(button=>button.textContent.includes('+ Produto'));if(addButton)addButton.hidden=!isOwner();
 }
-function demoAccount(mode){
-  const email=document.getElementById('account-email').value.trim();
-  const name=document.getElementById('account-name').value.trim();
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){toast('Informe um e-mail válido para a prévia.');return;}
-  demoSession={email,name:name||email.split('@')[0]};
-  document.getElementById('account-status').textContent=(mode==='register'?'Cadastro de demonstração concluído. ':'Login de demonstração concluído. ')+'Sessão apenas nesta aba; não existe conta real.';
-  toast('Prévia de conta iniciada.');
+function openAccount(){updateAccountUI();openModal('account-modal');}
+async function authAccount(mode){
+ const email=document.getElementById('account-email').value.trim(),password=document.getElementById('account-password').value;
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||password.length<8){toast('Informe e-mail válido e senha com pelo menos 8 caracteres.');return;}
+ const result=mode==='register'?await supabaseClient.auth.signUp({email,password}):await supabaseClient.auth.signInWithPassword({email,password});
+ if(result.error){toast(result.error.message);return;}
+ if(mode==='register'&&!result.data.session)toast('Conta criada. Confirme o e-mail para entrar.');else toast('Autenticação concluída.');
+ currentUser=result.data.user||result.data.session?.user||null;updateAccountUI();await renderShop();
 }
-function logoutDemo(){
-  demoSession=null;
-  document.getElementById('account-status').textContent='Sessão da prévia encerrada.';
+async function signOutAccount(){
+ const {error}=await supabaseClient.auth.signOut();if(error){toast('Não foi possível sair.');return;}
+ currentUser=null;updateAccountUI();await renderShop();toast('Você saiu da conta.');
 }
 async function loadRates(force=false){
   const result=document.getElementById('fx-result');
@@ -405,7 +419,8 @@ function addNoticeElement(){
   const notice=document.createElement('p');notice.id='notice';notice.hidden=true;notice.setAttribute('role','status');notice.className='fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-xs shadow-xl';document.body.appendChild(notice);
 }
 addNoticeElement();
-renderShop();renderKeys();updateCounts();
+renderKeys();updateCounts();
+refreshAuth();
 </script>
 </body>
 </html>
