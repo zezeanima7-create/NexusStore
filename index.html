@@ -17,8 +17,8 @@
   <main class="mx-auto max-w-6xl space-y-6">
     <header class="relative flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-800 bg-slate-900 p-4">
       <a href="#" class="text-lg font-extrabold" aria-label="NexusStore início">Nexus<span class="text-indigo-400">Store</span></a>
-      <button id="menu-toggle" type="button" aria-expanded="false" aria-controls="menu-panel" onclick="toggleMenu()" class="rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-lg" aria-label="Abrir menu">☰</button>
-      <nav id="menu-panel" hidden class="absolute right-0 top-full z-30 mt-2 grid min-w-48 gap-2 rounded-xl border border-slate-700 bg-slate-900 p-3 text-xs font-semibold shadow-xl sm:right-[calc((100%-72rem)/2+1rem)]" aria-label="Abas principais">
+      <button id="menu-toggle" type="button" aria-expanded="false" aria-controls="menu-panel" onclick="toggleMenu()" class="rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-lg" aria-label="Abrir menu">⋮</button>
+      <nav id="menu-panel" hidden class="absolute left-0 top-full z-30 mt-2 grid min-w-48 gap-2 rounded-xl border border-slate-700 bg-slate-900 p-3 text-xs font-semibold shadow-xl sm:left-4" aria-label="Abas principais">
         <button class="rounded-xl bg-indigo-600 px-3 py-2 text-left hover:bg-indigo-500" onclick="setView('shop');toggleMenu(false)">Loja</button>
         <button class="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-left text-amber-300" onclick="setView('check');toggleMenu(false)">Analisador</button>
         <button class="rounded-xl bg-slate-800 px-3 py-2 text-left hover:bg-slate-700" onclick="openWallet();toggleMenu(false)">Carteira</button>
@@ -153,7 +153,7 @@
       <div class="flex items-center justify-between"><h2 id="add-title" class="text-sm font-bold">Novo produto</h2><button type="button" onclick="closeModal('add-modal')" aria-label="Fechar" class="text-slate-400">✕</button></div>
       <label class="block">Nome<input id="n-name" required maxlength="80" class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5"></label>
       <label class="block">Jogo / categoria<input id="n-game" required maxlength="60" value="Universal" class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5"></label>
-      <label class="block">Tipo<select id="n-cat" class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5"><option>Executor</option><option>Script Hub</option><option>Combo</option></select></label>
+      <label class="block">Tipo<select id="n-cat" class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5"><option>Ferramentas Studio</option><option>Aprendizado Lua</option><option>Personalização</option></select></label>
       <label class="block">URL da imagem (opcional)<input id="n-img" type="url" maxlength="500" placeholder="https://..." class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5"></label>
       <div class="grid grid-cols-3 gap-2">
         <label>7 dias<input id="p-7" type="number" min="0.01" max="999999" step="0.01" value="14.90" required class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2"></label>
@@ -228,7 +228,7 @@ function setView(view){
   if(view==='check')document.getElementById('view-check').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function renderShop(){
-  const categories=['Todos','Executor','Script Hub','Combo'];
+  const categories=['Todos','Ferramentas Studio','Aprendizado Lua','Personalização'];
   document.getElementById('cats').innerHTML=categories.map(cat=>'<button onclick="S.cat='+JSON.stringify(cat)+';renderShop()" class="rounded-xl px-3 py-1.5 text-xs font-semibold '+(S.cat===cat?'bg-indigo-600':'border border-slate-800 bg-slate-900 text-slate-300')+'">'+safeText(cat)+'</button>').join('');
   const games=['Todos',...new Set(S.items.map(item=>item.game))];
   const select=document.getElementById('game-sel');
