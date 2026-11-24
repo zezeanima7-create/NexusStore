@@ -21,6 +21,8 @@
         <button class="rounded-xl bg-indigo-600 px-3 py-2 hover:bg-indigo-500" onclick="setView('shop')">Loja</button>
         <button class="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-amber-300" onclick="setView('check')">Analisador</button>
         <button class="rounded-xl bg-slate-800 px-3 py-2 hover:bg-slate-700" onclick="openModal('add-modal')">+ Produto</button>
+        <button class="rounded-xl bg-slate-800 px-3 py-2 hover:bg-slate-700" onclick="openAccount()">Conta</button>
+        <button class="rounded-xl bg-slate-800 px-3 py-2 hover:bg-slate-700" onclick="openModal('currency-modal');loadRates()">Câmbio</button>
         <button class="rounded-xl bg-slate-800 px-3 py-2 hover:bg-slate-700" onclick="openModal('keys-modal');renderKeys()">Keys (<span id="k-count">0</span>)</button>
         <button class="rounded-xl bg-cyan-700 px-3 py-2 hover:bg-cyan-600" onclick="openModal('cart-modal');renderCart()">Carrinho (<span id="c-count">0</span>)</button>
         <button class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 font-mono text-emerald-300" onclick="openWallet()">Carteira <span id="w-bal">R$ 0,00</span></button>
@@ -84,6 +86,32 @@
       </div>
       <div id="w-tx" class="max-h-48 space-y-2 overflow-y-auto text-xs"></div>
       <button onclick="withdraw()" class="w-full rounded-xl bg-emerald-700 py-2 text-xs font-bold hover:bg-emerald-600">Registrar retirada simulada</button>
+    </div>
+  </div>
+
+  <div id="account-modal" class="modal fixed inset-0 z-40 hidden items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-labelledby="account-title">
+    <div class="w-full max-w-md space-y-4 rounded-2xl border border-slate-800 bg-slate-900 p-5">
+      <div class="flex items-center justify-between"><h2 id="account-title" class="font-bold">Conta NexusStore</h2><button onclick="closeModal('account-modal')" aria-label="Fechar" class="text-slate-400">✕</button></div>
+      <p class="text-xs leading-relaxed text-amber-200">Prévia visual: cadastro e login ainda não autenticam usuários nem protegem contas. Não informe senhas reais. Para produção é necessário um backend de autenticação seguro.</p>
+      <label class="block text-xs">Nome de exibição<input id="account-name" maxlength="40" autocomplete="nickname" class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5"></label>
+      <label class="block text-xs">E-mail<input id="account-email" type="email" maxlength="120" autocomplete="email" required class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5"></label>
+      <div class="flex gap-2"><button onclick="demoAccount('login')" class="flex-1 rounded-xl bg-indigo-600 py-2.5 text-xs font-bold">Entrar (prévia)</button><button onclick="demoAccount('register')" class="flex-1 rounded-xl bg-slate-700 py-2.5 text-xs font-bold">Cadastrar (prévia)</button></div>
+      <p id="account-status" class="text-xs text-slate-400" aria-live="polite">Nenhuma sessão ativa.</p>
+      <button onclick="logoutDemo()" class="w-full rounded-xl border border-slate-700 py-2 text-xs">Sair da prévia</button>
+    </div>
+  </div>
+
+  <div id="currency-modal" class="modal fixed inset-0 z-40 hidden items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-labelledby="currency-title">
+    <div class="w-full max-w-md space-y-4 rounded-2xl border border-slate-800 bg-slate-900 p-5">
+      <div class="flex items-center justify-between"><h2 id="currency-title" class="font-bold">Conversor de moedas</h2><button onclick="closeModal('currency-modal')" aria-label="Fechar" class="text-slate-400">✕</button></div>
+      <p class="text-xs text-slate-400">Cotações de referência obtidas online. O valor final de bancos e cartões pode incluir spread, tarifas e impostos.</p>
+      <label class="block text-xs">Valor<input id="fx-amount" type="number" min="0" step="any" value="1" class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5" oninput="convertCurrency()"></label>
+      <div class="grid grid-cols-2 gap-2">
+        <label class="text-xs">De<select id="fx-from" class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5" onchange="convertCurrency()"><option>USD</option><option>BRL</option><option>EUR</option><option>GBP</option></select></label>
+        <label class="text-xs">Para<select id="fx-to" class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5" onchange="convertCurrency()"><option>BRL</option><option>USD</option><option>EUR</option><option>GBP</option></select></label>
+      </div>
+      <div class="rounded-xl border border-slate-800 bg-slate-950 p-4"><p class="text-[10px] text-slate-400">RESULTADO ESTIMADO</p><p id="fx-result" class="mt-1 font-mono text-xl font-bold">Carregando cotação…</p><p id="fx-updated" class="mt-2 text-[10px] text-slate-500" aria-live="polite"></p></div>
+      <button onclick="loadRates(true)" class="w-full rounded-xl bg-indigo-600 py-2.5 text-xs font-bold">Atualizar cotação</button>
     </div>
   </div>
 
@@ -250,6 +278,57 @@ function updateCounts(){
   document.getElementById('c-count').textContent=S.cart.reduce((sum,row)=>sum+row.qty,0);
   document.getElementById('k-count').textContent=S.keys.length;
   document.getElementById('w-bal').textContent=brl(S.cash);
+}
+// A autenticação abaixo é apenas uma prévia de interface; não armazena credenciais.
+let demoSession = null;
+let fxRates = null;
+let fxDate = '';
+const fxCurrencies = ['USD','BRL','EUR','GBP'];
+function openAccount(){
+  const status=document.getElementById('account-status');
+  status.textContent=demoSession?'Prévia ativa: '+demoSession.email:'Nenhuma sessão ativa.';
+  openModal('account-modal');
+}
+function demoAccount(mode){
+  const email=document.getElementById('account-email').value.trim();
+  const name=document.getElementById('account-name').value.trim();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){toast('Informe um e-mail válido para a prévia.');return;}
+  demoSession={email,name:name||email.split('@')[0]};
+  document.getElementById('account-status').textContent=(mode==='register'?'Cadastro de demonstração concluído. ':'Login de demonstração concluído. ')+'Sessão apenas nesta aba; não existe conta real.';
+  toast('Prévia de conta iniciada.');
+}
+function logoutDemo(){
+  demoSession=null;
+  document.getElementById('account-status').textContent='Sessão da prévia encerrada.';
+}
+async function loadRates(force=false){
+  const result=document.getElementById('fx-result');
+  const updated=document.getElementById('fx-updated');
+  if(!force&&fxRates){convertCurrency();return;}
+  result.textContent='Buscando cotação…';updated.textContent='';
+  try{
+    const response=await fetch('https://api.frankfurter.app/latest?from=USD&to=BRL,EUR,GBP',{cache:'no-store'});
+    if(!response.ok)throw new Error('Serviço de câmbio indisponível');
+    const data=await response.json();
+    if(!data.rates||!data.rates.BRL||!data.rates.EUR||!data.rates.GBP)throw new Error('Resposta de câmbio inválida');
+    fxRates={USD:1,...data.rates};fxDate=data.date||'';
+    convertCurrency();
+    updated.textContent='Referência: '+(fxDate||'data não informada')+' · Fonte: Frankfurter';
+  }catch(error){
+    result.textContent='Cotação indisponível';
+    updated.textContent='Verifique a conexão e tente atualizar. '+error.message;
+  }
+}
+function convertCurrency(){
+  const amount=Number(document.getElementById('fx-amount').value);
+  const from=document.getElementById('fx-from').value;
+  const to=document.getElementById('fx-to').value;
+  const result=document.getElementById('fx-result');
+  if(!Number.isFinite(amount)||amount<0){result.textContent='Informe um valor válido';return;}
+  if(!fxRates){result.textContent='Carregando cotação…';return;}
+  const inUsd=from==='USD'?amount:amount/fxRates[from];
+  const converted=inUsd*fxRates[to];
+  result.textContent=converted.toLocaleString('pt-BR',{style:'currency',currency:to});
 }
 function addNoticeElement(){
   const notice=document.createElement('p');notice.id='notice';notice.hidden=true;notice.setAttribute('role','status');notice.className='fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-xs shadow-xl';document.body.appendChild(notice);
