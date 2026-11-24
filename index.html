@@ -15,10 +15,10 @@
 </head>
 <body class="min-h-screen bg-slate-950 p-4 font-sans text-slate-100 sm:p-6">
   <main class="mx-auto max-w-6xl space-y-6">
-    <header class="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-800 bg-slate-900 p-4">
+    <header class="relative flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-800 bg-slate-900 p-4">
       <a href="#" class="text-lg font-extrabold" aria-label="NexusStore início">Nexus<span class="text-indigo-400">Store</span></a>
       <button id="menu-toggle" type="button" aria-expanded="false" aria-controls="menu-panel" onclick="toggleMenu()" class="rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-lg" aria-label="Abrir menu">☰</button>
-      <nav id="menu-panel" hidden class="absolute right-4 top-20 z-30 grid min-w-48 gap-2 rounded-xl border border-slate-700 bg-slate-900 p-3 text-xs font-semibold shadow-xl sm:right-[calc((100%-72rem)/2+1rem)]" aria-label="Abas principais">
+      <nav id="menu-panel" hidden class="absolute right-0 top-full z-30 mt-2 grid min-w-48 gap-2 rounded-xl border border-slate-700 bg-slate-900 p-3 text-xs font-semibold shadow-xl sm:right-[calc((100%-72rem)/2+1rem)]" aria-label="Abas principais">
         <button class="rounded-xl bg-indigo-600 px-3 py-2 text-left hover:bg-indigo-500" onclick="setView('shop');toggleMenu(false)">Loja</button>
         <button class="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-left text-amber-300" onclick="setView('check');toggleMenu(false)">Analisador</button>
         <button class="rounded-xl bg-slate-800 px-3 py-2 text-left hover:bg-slate-700" onclick="openWallet();toggleMenu(false)">Carteira</button>
@@ -37,6 +37,24 @@
       <strong>Modo demonstração:</strong> este projeto não processa pagamentos nem valida licenças em servidor. Vendas e keys geradas aqui são registros locais de teste e não representam transações reais.
     </div>
 
+    <section class="relative isolate overflow-hidden rounded-2xl border border-indigo-400/20 bg-slate-900">
+      <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1600&q=85" alt="Ambiente gamer com iluminação e computadores" class="absolute inset-0 -z-20 h-full w-full object-cover opacity-35" onerror="this.style.display='none'">
+      <div class="absolute inset-0 -z-10 bg-gradient-to-r from-slate-950 via-slate-950/85 to-indigo-950/50"></div>
+      <div class="max-w-2xl space-y-3 p-6 sm:p-9">
+        <p class="text-xs font-bold uppercase tracking-[.25em] text-cyan-300">NexusStore</p>
+        <h1 class="text-3xl font-black tracking-tight sm:text-4xl">Bem-vindo à NexusStore</h1>
+        <p class="max-w-xl text-sm leading-relaxed text-slate-200">Encontre produtos digitais, confira as recomendações e explore a loja. Esta versão é uma demonstração: não realiza pagamentos nem entrega licenças reais.</p>
+        <button onclick="setView('shop')" class="rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold hover:bg-indigo-500">Explorar produtos</button>
+      </div>
+    </section>
+    <section class="space-y-3">
+      <div><h2 class="text-lg font-bold">Recomendados</h2><p class="text-xs text-slate-400">Sugestões digitais para personalizar e organizar seu espaço gamer.</p></div>
+      <div class="grid gap-3 sm:grid-cols-3">
+        <article class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900"><img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80" alt="Arte digital abstrata para wallpapers" class="h-28 w-full object-cover"><div class="space-y-1 p-3"><h3 class="text-sm font-bold">Pack de wallpapers gamer</h3><p class="text-xs text-slate-400">Coleção visual para personalizar seu desktop.</p></div></article>
+        <article class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900"><img src="https://images.unsplash.com/photo-1593305841991-05c297ba4575?auto=format&fit=crop&w=800&q=80" alt="Equipamentos de computador e setup" class="h-28 w-full object-cover"><div class="space-y-1 p-3"><h3 class="text-sm font-bold">Kit de overlays para stream</h3><p class="text-xs text-slate-400">Elementos gráficos para organizar suas transmissões.</p></div></article>
+        <article class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900"><img src="https://images.unsplash.com/photo-151632131 adicionales?auto=format&fit=crop&w=800&q=80" alt="Mesa de trabalho com computador" class="h-28 w-full object-cover"><div class="space-y-1 p-3"><h3 class="text-sm font-bold">Guia de setup e desempenho</h3><p class="text-xs text-slate-400">Dicas de organização e configuração do computador.</p></div></article>
+      </div>
+    </section>
     <section id="view-shop" class="space-y-4">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div id="cats" class="flex flex-wrap gap-2"></div>
@@ -222,7 +240,7 @@ function renderShop(){
     const index=Math.min(Number(S.selected[item.id]||0),item.plans.length-1);
     const plan=item.plans[index]||item.plans[0];
     const image=validImage(item.img)?item.img:fallbackImage(item.game);
-    return '<article class="flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-800 bg-slate-900"><div><img src="'+safeText(image)+'" alt="Imagem de '+safeText(item.name)+'" loading="lazy" class="h-36 w-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/600x240/0f172a/38bdf8?text=NexusStore'"><div class="space-y-3 p-4"><div class="flex justify-between gap-2 text-[11px] text-cyan-300"><span>'+safeText(item.game)+'</span><span>'+safeText(item.cat)+'</span></div><h2 class="font-bold">'+safeText(item.name)+'</h2><div class="grid grid-cols-'+item.plans.length+' gap-1 rounded-xl bg-slate-950 p-1">'+item.plans.map((p,i)=>'<button onclick="S.selected['+JSON.stringify(item.id)+']='+i+';renderShop()" class="rounded-lg py-1.5 text-[11px] '+(i===index?'bg-indigo-600 text-white':'text-slate-400')+'">'+safeText(p[0])+'</button>').join('')+'</div></div></div><div class="flex items-center justify-between px-4 pb-4"><span class="font-mono text-sm font-bold">'+brl(plan[1])+'</span><button onclick="addCart('+JSON.stringify(item.id)+','+index+')" class="rounded-xl bg-indigo-600 px-3 py-2 text-xs font-semibold hover:bg-indigo-500">Adicionar</button></div></article>';
+    return '<article class="flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-800 bg-slate-900"><div><img src="'+safeText(image)+'" alt="Imagem de '+safeText(item.name)+'" loading="lazy" class="h-36 w-full object-cover" onerror="this.onerror=null;this.src=&quot;https://placehold.co/600x240/0f172a/38bdf8?text=NexusStore&quot;"><div class="space-y-3 p-4"><div class="flex justify-between gap-2 text-[11px] text-cyan-300"><span>'+safeText(item.game)+'</span><span>'+safeText(item.cat)+'</span></div><h2 class="font-bold">'+safeText(item.name)+'</h2><div class="grid grid-cols-'+item.plans.length+' gap-1 rounded-xl bg-slate-950 p-1">'+item.plans.map((p,i)=>'<button onclick="S.selected['+JSON.stringify(item.id)+']='+i+';renderShop()" class="rounded-lg py-1.5 text-[11px] '+(i===index?'bg-indigo-600 text-white':'text-slate-400')+'">'+safeText(p[0])+'</button>').join('')+'</div></div></div><div class="flex items-center justify-between px-4 pb-4"><span class="font-mono text-sm font-bold">'+brl(plan[1])+'</span><button onclick="addCart('+JSON.stringify(item.id)+','+index+')" class="rounded-xl bg-indigo-600 px-3 py-2 text-xs font-semibold hover:bg-indigo-500">Adicionar</button></div></article>';
   }).join('');
   updateCounts();persist();
 }
