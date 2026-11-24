@@ -1,330 +1,261 @@
-```html
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR" class="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NexusHub — Scripts & Executores</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="NexusStore — catálogo demonstrativo de produtos digitais.">
+  <meta name="theme-color" content="#020617">
+  <title>NexusStore — Produtos digitais</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>tailwind.config = { darkMode: 'class' };</script>
+  <style>
+    :focus-visible{outline:2px solid #818cf8;outline-offset:3px}
+    [hidden]{display:none!important}
+  </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen p-4 sm:p-6 font-sans">
-  <div class="max-w-6xl mx-auto space-y-6">
-    <!-- Topo -->
-    <header class="flex flex-wrap items-center justify-between gap-3 bg-slate-900 border border-slate-800 p-4 rounded-2xl">
-      <div class="font-extrabold text-lg">⚡ NexusHub <span class="text-xs text-indigo-400 font-mono">STORE</span></div>
-      <div class="flex flex-wrap gap-2 text-xs font-semibold">
-        <button onclick="setView('shop')" class="px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500">Loja</button>
-        <button onclick="setView('check')" class="px-3 py-2 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30">🛡️ Kick/Ban</button>
-        <button onclick="openModal('add-modal')" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700">+ Script</button>
-        <button onclick="openModal('freekey-modal')" class="px-3 py-2 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30">🎟️ Key R$ 1</button>
-        <button onclick="openModal('keys-modal')" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700">🔑 Keys (<span id="k-count">0</span>)</button>
-        <button onclick="openModal('cart-modal')" class="px-3 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500">🛒 (<span id="c-count">0</span>)</button>
-        <button onclick="openWallet()" class="px-3 py-2 rounded-xl bg-emerald-600/20 text-emerald-300 border border-emerald-500/30 font-mono">
-          👑 <span id="w-bal">R$ 0,00</span>
-        </button>
-      </div>
+<body class="min-h-screen bg-slate-950 p-4 font-sans text-slate-100 sm:p-6">
+  <main class="mx-auto max-w-6xl space-y-6">
+    <header class="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-800 bg-slate-900 p-4">
+      <a href="#" class="text-lg font-extrabold" aria-label="NexusStore início">Nexus<span class="text-indigo-400">Store</span></a>
+      <nav class="flex flex-wrap gap-2 text-xs font-semibold" aria-label="Navegação principal">
+        <button class="rounded-xl bg-indigo-600 px-3 py-2 hover:bg-indigo-500" onclick="setView('shop')">Loja</button>
+        <button class="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-amber-300" onclick="setView('check')">Analisador</button>
+        <button class="rounded-xl bg-slate-800 px-3 py-2 hover:bg-slate-700" onclick="openModal('add-modal')">+ Produto</button>
+        <button class="rounded-xl bg-slate-800 px-3 py-2 hover:bg-slate-700" onclick="openModal('keys-modal');renderKeys()">Keys (<span id="k-count">0</span>)</button>
+        <button class="rounded-xl bg-cyan-700 px-3 py-2 hover:bg-cyan-600" onclick="openModal('cart-modal');renderCart()">Carrinho (<span id="c-count">0</span>)</button>
+        <button class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 font-mono text-emerald-300" onclick="openWallet()">Carteira <span id="w-bal">R$ 0,00</span></button>
+      </nav>
     </header>
 
-    <!-- Loja -->
+    <div class="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs leading-relaxed text-amber-200">
+      <strong>Modo demonstração:</strong> este projeto não processa pagamentos nem valida licenças em servidor. Vendas e keys geradas aqui são registros locais de teste e não representam transações reais.
+    </div>
+
     <section id="view-shop" class="space-y-4">
-      <div class="flex flex-wrap gap-2 items-center justify-between">
+      <div class="flex flex-wrap items-center justify-between gap-3">
         <div id="cats" class="flex flex-wrap gap-2"></div>
-        <select id="game-sel" onchange="renderShop()" class="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs">
-          <option value="Todos">Todos os Jogos</option>
-        </select>
+        <label class="text-xs text-slate-400">Jogo
+          <select id="game-sel" class="ml-2 rounded-xl border border-slate-800 bg-slate-900 px-3 py-2 text-slate-100" onchange="S.game=this.value;renderShop()">
+            <option value="Todos">Todos</option>
+          </select>
+        </label>
       </div>
-      <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      <div id="grid" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
+      <p id="empty-shop" class="hidden rounded-xl border border-slate-800 p-8 text-center text-sm text-slate-400">Nenhum produto nesta categoria.</p>
     </section>
 
-    <!-- Verificador Kick / Ban -->
-    <section id="view-check" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
-      <h2 class="font-bold text-base">Verificação de Script (Kick Automático / Ban)</h2>
-      <textarea id="code-in" rows="6" placeholder="Cole o código ou função do script..." class="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 font-mono text-xs"></textarea>
-      <div class="flex gap-2">
-        <button onclick="checkCode()" class="px-4 py-2 rounded-xl bg-indigo-600 text-xs font-bold">Analisar</button>
-        <button onclick="fillSample()" class="px-3 py-2 rounded-xl bg-slate-800 text-xs">Exemplo Kick/Ban</button>
+    <section id="view-check" class="hidden space-y-3 rounded-2xl border border-slate-800 bg-slate-900 p-5">
+      <div>
+        <h1 class="font-bold">Analisador estático de indicadores</h1>
+        <p class="mt-1 text-xs text-slate-400">Procura palavras-chave no texto. Não executa o código e não consegue confirmar se um jogo aplicará kick ou ban.</p>
       </div>
-      <div id="code-out" class="text-xs space-y-2 pt-2"></div>
+      <textarea id="code-in" rows="7" maxlength="50000" placeholder="Cole um trecho de código para procurar indicadores..." class="w-full rounded-xl border border-slate-800 bg-slate-950 p-3 font-mono text-xs"></textarea>
+      <div class="flex flex-wrap gap-2">
+        <button onclick="checkCode()" class="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold hover:bg-indigo-500">Analisar texto</button>
+        <button onclick="document.getElementById('code-in').value='';document.getElementById('code-out').replaceChildren()" class="rounded-xl bg-slate-800 px-3 py-2 text-xs">Limpar</button>
+      </div>
+      <div id="code-out" aria-live="polite" class="space-y-2 text-xs"></div>
     </section>
-  </div>
+  </main>
 
-  <!-- Modal Carteira Dono -->
-  <div id="wallet-modal" class="fixed inset-0 hidden items-center justify-center bg-black/70 p-4 z-40">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-5 space-y-4">
-      <div class="flex justify-between items-center">
-        <h3 class="font-bold">👑 Carteira do Dono</h3>
-        <button onclick="closeModal('wallet-modal')" class="text-slate-400">✕</button>
-      </div>
-      <div class="grid grid-cols-3 gap-2 text-center bg-slate-950 p-3 rounded-xl border border-slate-800">
-        <div><div class="text-[10px] text-slate-400">BRUTO</div><div id="w-gross" class="font-mono font-bold text-xs mt-1">R$ 0,00</div></div>
-        <div><div class="text-[10px] text-slate-400">LÍQUIDO</div><div id="w-net" class="font-mono font-bold text-xs text-indigo-400 mt-1">R$ 0,00</div></div>
-        <div><div class="text-[10px] text-slate-400">CAIXA</div><div id="w-cash" class="font-mono font-bold text-xs text-emerald-400 mt-1">R$ 0,00</div></div>
-      </div>
-      <div id="w-chart" class="bg-slate-950 p-3 rounded-xl border border-slate-800"></div>
-      <div id="w-tx" class="max-h-36 overflow-y-auto space-y-1 text-xs"></div>
-      <button onclick="withdraw()" class="w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-bold">Sacar Caixa</button>
+  <div id="cart-modal" class="modal fixed inset-0 z-40 hidden items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-labelledby="cart-title">
+    <div class="w-full max-w-lg space-y-4 rounded-2xl border border-slate-800 bg-slate-900 p-5">
+      <div class="flex items-center justify-between"><h2 id="cart-title" class="font-bold">Carrinho</h2><button onclick="closeModal('cart-modal')" aria-label="Fechar" class="text-slate-400">✕</button></div>
+      <div id="cart-list" class="max-h-64 space-y-2 overflow-y-auto text-xs"></div>
+      <div class="flex justify-between border-t border-slate-800 pt-3 text-sm font-bold"><span>Total</span><span id="cart-total" class="font-mono">R$ 0,00</span></div>
+      <button onclick="buyCart()" class="w-full rounded-xl bg-emerald-600 py-2.5 text-xs font-bold hover:bg-emerald-500">Registrar venda de demonstração</button>
     </div>
   </div>
 
-  <!-- Modal Carrinho -->
-  <div id="cart-modal" class="fixed inset-0 hidden items-center justify-center bg-black/70 p-4 z-40">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-5 space-y-4">
-      <div class="flex justify-between items-center">
-        <h3 class="font-bold">🛒 Carrinho</h3>
-        <button onclick="closeModal('cart-modal')" class="text-slate-400">✕</button>
-      </div>
-      <div id="cart-list" class="space-y-2 max-h-52 overflow-y-auto text-xs"></div>
-      <div class="flex justify-between font-bold text-sm border-t border-slate-800 pt-3">
-        <span>Total</span><span id="cart-total" class="font-mono">R$ 0,00</span>
-      </div>
-      <button onclick="buyCart()" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-bold">Finalizar Venda & Gerar Key</button>
+  <div id="keys-modal" class="modal fixed inset-0 z-40 hidden items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-labelledby="keys-title">
+    <div class="w-full max-w-lg space-y-3 rounded-2xl border border-slate-800 bg-slate-900 p-5">
+      <div class="flex items-center justify-between"><h2 id="keys-title" class="font-bold">Keys de demonstração</h2><button onclick="closeModal('keys-modal')" aria-label="Fechar" class="text-slate-400">✕</button></div>
+      <div id="keys-list" class="max-h-72 space-y-2 overflow-y-auto text-xs"></div>
     </div>
   </div>
 
-  <!-- Modal Keys -->
-  <div id="keys-modal" class="fixed inset-0 hidden items-center justify-center bg-black/70 p-4 z-40">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-5 space-y-3">
-      <div class="flex justify-between items-center">
-        <h3 class="font-bold">🔑 Keys Geradas</h3>
-        <button onclick="closeModal('keys-modal')" class="text-slate-400">✕</button>
+  <div id="wallet-modal" class="modal fixed inset-0 z-40 hidden items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-labelledby="wallet-title">
+    <div class="w-full max-w-lg space-y-4 rounded-2xl border border-slate-800 bg-slate-900 p-5">
+      <div class="flex items-center justify-between"><h2 id="wallet-title" class="font-bold">Resumo local de vendas</h2><button onclick="closeModal('wallet-modal')" aria-label="Fechar" class="text-slate-400">✕</button></div>
+      <div class="grid grid-cols-3 gap-2 rounded-xl border border-slate-800 bg-slate-950 p-3 text-center">
+        <div><p class="text-[10px] text-slate-400">BRUTO</p><p id="w-gross" class="mt-1 font-mono text-xs font-bold">R$ 0,00</p></div>
+        <div><p class="text-[10px] text-slate-400">LÍQUIDO</p><p id="w-net" class="mt-1 font-mono text-xs font-bold text-indigo-300">R$ 0,00</p></div>
+        <div><p class="text-[10px] text-slate-400">CAIXA</p><p id="w-cash" class="mt-1 font-mono text-xs font-bold text-emerald-300">R$ 0,00</p></div>
       </div>
-      <div id="keys-list" class="space-y-2 max-h-64 overflow-y-auto text-xs"></div>
+      <div id="w-tx" class="max-h-48 space-y-2 overflow-y-auto text-xs"></div>
+      <button onclick="withdraw()" class="w-full rounded-xl bg-emerald-700 py-2 text-xs font-bold hover:bg-emerald-600">Registrar retirada simulada</button>
     </div>
   </div>
 
-  <!-- Modal Gerador Key R$ 1 -->
-  <div id="freekey-modal" class="fixed inset-0 hidden items-center justify-center bg-black/70 p-4 z-40">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-5 space-y-3 text-xs">
-      <div class="flex justify-between items-center">
-        <h3 class="font-bold text-sm">🎟️ Gerador de Key (R$ 1,00 cada)</h3>
-        <button type="button" onclick="closeModal('freekey-modal')" class="text-slate-400">✕</button>
-      </div>
-      <p class="text-slate-400">Gera uma key promocional/grátis avulsa por <span class="text-emerald-400 font-mono font-bold">R$ 1,00</span> e registra no seu caixa.</p>
-      <input id="fk-label" placeholder="Rótulo opcional (ex: Free 24h, Teste)" class="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800" />
-      <button type="button" onclick="genPaidFreeKey()" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold">Gerar Key por R$ 1,00</button>
-    </div>
-  </div>
-
-  <!-- Modal Novo Script -->
-  <div id="add-modal" class="fixed inset-0 hidden items-center justify-center bg-black/70 p-4 z-40">
-    <form onsubmit="addItem(event)" class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-5 space-y-3 text-xs">
-      <div class="flex justify-between items-center">
-        <h3 class="font-bold text-sm">+ Novo Script / Executor</h3>
-        <button type="button" onclick="closeModal('add-modal')" class="text-slate-400">✕</button>
-      </div>
-      <input id="n-name" required placeholder="Nome (ex: Delta Executor, Fluxus Hub)" class="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800" />
-      <input id="n-game" required placeholder="Jogo (ex: Blox Fruits, Universal)" class="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800" />
-      <select id="n-cat" class="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800">
-        <option>Executor</option><option>Script Hub</option><option>Combo</option>
-      </select>
-      <input id="n-img" placeholder="URL da foto do jogo (opcional)" class="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800" />
+  <div id="add-modal" class="modal fixed inset-0 z-40 hidden items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-labelledby="add-title">
+    <form id="add-form" class="w-full max-w-md space-y-3 rounded-2xl border border-slate-800 bg-slate-900 p-5 text-xs" onsubmit="addItem(event)">
+      <div class="flex items-center justify-between"><h2 id="add-title" class="text-sm font-bold">Novo produto</h2><button type="button" onclick="closeModal('add-modal')" aria-label="Fechar" class="text-slate-400">✕</button></div>
+      <label class="block">Nome<input id="n-name" required maxlength="80" class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5"></label>
+      <label class="block">Jogo / categoria<input id="n-game" required maxlength="60" value="Universal" class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5"></label>
+      <label class="block">Tipo<select id="n-cat" class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5"><option>Executor</option><option>Script Hub</option><option>Combo</option></select></label>
+      <label class="block">URL da imagem (opcional)<input id="n-img" type="url" maxlength="500" placeholder="https://..." class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2.5"></label>
       <div class="grid grid-cols-3 gap-2">
-        <input id="p-7" type="number" step="0.01" value="14.90" required class="p-2 rounded-xl bg-slate-950 border border-slate-800 font-mono" />
-        <input id="p-30" type="number" step="0.01" value="34.90" required class="p-2 rounded-xl bg-slate-950 border border-slate-800 font-mono" />
-        <input id="p-life" type="number" step="0.01" value="79.90" required class="p-2 rounded-xl bg-slate-950 border border-slate-800 font-mono" />
+        <label>7 dias<input id="p-7" type="number" min="0.01" max="999999" step="0.01" value="14.90" required class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2"></label>
+        <label>30 dias<input id="p-30" type="number" min="0.01" max="999999" step="0.01" value="34.90" required class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2"></label>
+        <label>VIP<input id="p-life" type="number" min="0.01" max="999999" step="0.01" value="79.90" required class="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 p-2"></label>
       </div>
-      <button type="submit" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-bold">Salvar</button>
+      <button type="submit" class="w-full rounded-xl bg-indigo-600 py-2.5 font-bold hover:bg-indigo-500">Salvar produto</button>
     </form>
   </div>
 
-  <script>
-    const imgFallback = (txt) => `https://placehold.co/600x240/0f172a/38bdf8?text=${encodeURIComponent(txt || 'NexusHub')}`;
-    const brl = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
-    const S = {
-      cat: 'Todos',
-      game: 'Todos',
-      fee: 0.05,
-      cash: 0,
-      gross: 0,
-      net: 0,
-      tx: [],
-      cart: [],
-      keys: [],
-      sel: {},
-      items: [
-        { id: 'delta', name: 'Delta Executor', game: 'Universal', cat: 'Executor', img: imgFallback('DELTA EXECUTOR'), plans: [['7d', 14.9], ['30d', 34.9], ['VIP', 79.9]] },
-        { id: 'fluxus', name: 'Fluxus Executor', game: 'Universal', cat: 'Executor', img: imgFallback('FLUXUS EXECUTOR'), plans: [['7d', 16.9], ['30d', 39.9], ['VIP', 89.9]] },
-        { id: 'solara', name: 'Solara Executor', game: 'Universal', cat: 'Executor', img: imgFallback('SOLARA EXECUTOR'), plans: [['7d', 18.9], ['30d', 44.9], ['VIP', 99.9]] },
-        { id: 'wave', name: 'Wave Executor', game: 'Universal', cat: 'Executor', img: imgFallback('WAVE EXECUTOR'), plans: [['7d', 19.9], ['30d', 46.9], ['VIP', 104.9]] },
-        { id: 'codex', name: 'Codex Executor', game: 'Universal', cat: 'Executor', img: imgFallback('CODEX EXECUTOR'), plans: [['7d', 15.9], ['30d', 36.9], ['VIP', 84.9]] },
-        { id: 'arceus', name: 'Arceus X Executor', game: 'Universal', cat: 'Executor', img: imgFallback('ARCEUS X'), plans: [['7d', 15.9], ['30d', 37.9], ['VIP', 84.9]] },
-        { id: 'krnl', name: 'KRNL Executor', game: 'Universal', cat: 'Executor', img: imgFallback('KRNL EXECUTOR'), plans: [['7d', 14.9], ['30d', 33.9], ['VIP', 74.9]] },
-        { id: 'synapse', name: 'Synapse Z Executor', game: 'Universal', cat: 'Executor', img: imgFallback('SYNAPSE Z'), plans: [['7d', 21.9], ['30d', 49.9], ['VIP', 114.9]] },
-        { id: 'blox', name: 'Aether Hub', game: 'Blox Fruits', cat: 'Script Hub', img: imgFallback('BLOX FRUITS HUB'), plans: [['7d', 12.9], ['30d', 29.9], ['VIP', 69.9]] },
-        { id: 'doors', name: 'Shadow ESP Hub', game: 'Doors', cat: 'Script Hub', img: imgFallback('DOORS HUB'), plans: [['7d', 11.9], ['30d', 27.9], ['VIP', 59.9]] }
-      ]
-    };
-
-    const openModal = (id) => { const el = document.getElementById(id); el.classList.remove('hidden'); el.classList.add('flex'); };
-    const closeModal = (id) => { const el = document.getElementById(id); el.classList.add('hidden'); el.classList.remove('flex'); };
-
-    function setView(v) {
-      document.getElementById('view-shop').classList.toggle('hidden', v !== 'shop');
-      document.getElementById('view-check').classList.toggle('hidden', v !== 'check');
-    }
-
-    function renderShop() {
-      const cats = ['Todos', 'Executor', 'Script Hub', 'Combo'];
-      document.getElementById('cats').innerHTML = cats.map((c) =>
-        `<button onclick="S.cat='${c}';renderShop()" class="px-3 py-1.5 rounded-xl text-xs font-semibold ${S.cat === c ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-300 border border-slate-800'}">${c}</button>`
-      ).join('');
-
-      const games = ['Todos', ...new Set(S.items.map((i) => i.game))];
-      const gSel = document.getElementById('game-sel');
-      gSel.innerHTML = games.map((g) => `<option value="${g}" ${S.game === g ? 'selected' : ''}>${g}</option>`).join('');
-      S.game = gSel.value;
-
-      const list = S.items.filter((i) => (S.cat === 'Todos' || i.cat === S.cat) && (S.game === 'Todos' || i.game === S.game));
-      document.getElementById('grid').innerHTML = list.map((it) => {
-        const pIdx = S.sel[it.id] ?? 0;
-        const [pLabel, pPrice] = it.plans[pIdx] || it.plans[0];
-        const fb = imgFallback(it.game);
-        return `
-          <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden flex flex-col justify-between">
-            <div>
-              <img src="${it.img || fb}" onerror="this.onerror=null;this.src='${fb}'" class="h-32 w-full object-cover" />
-              <div class="p-4 space-y-2">
-                <div class="flex justify-between text-[11px] text-cyan-400 font-mono"><span>🎮 ${it.game}</span><span>${it.cat}</span></div>
-                <div class="font-bold text-sm">${it.name}</div>
-                <div class="grid grid-cols-${it.plans.length} gap-1 bg-slate-950 p-1 rounded-xl">
-                  ${it.plans.map(([lbl], idx) => `<button onclick="S.sel['${it.id}']=${idx};renderShop()" class="py-1 rounded-lg text-[11px] font-semibold ${idx === pIdx ? 'bg-indigo-600 text-white' : 'text-slate-400'}">${lbl}</button>`).join('')}
-                </div>
-              </div>
-            </div>
-            <div class="px-4 pb-4 flex items-center justify-between">
-              <span class="font-mono font-bold text-sm">${brl(pPrice)}</span>
-              <button onclick="addCart('${it.id}',${pIdx})" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold">+ Add</button>
-            </div>
-          </div>`;
-      }).join('');
-      updateCounts();
-    }
-
-    function addItem(e) {
-      e.preventDefault();
-      const name = document.getElementById('n-name').value.trim();
-      const game = document.getElementById('n-game').value.trim() || 'Universal';
-      const cat = document.getElementById('n-cat').value;
-      const img = document.getElementById('n-img').value.trim() || imgFallback(game);
-      S.items.unshift({
-        id: 'custom-' + Date.now(), name, game, cat, img,
-        plans: [['7d', +document.getElementById('p-7').value], ['30d', +document.getElementById('p-30').value], ['VIP', +document.getElementById('p-life').value]]
-      });
-      closeModal('add-modal');
-      e.target.reset();
-      renderShop();
-    }
-
-    function addCart(id, pIdx) {
-      const it = S.items.find((x) => x.id === id);
-      const [plan, price] = it.plans[pIdx];
-      const key = `${id}-${plan}`;
-      const found = S.cart.find((c) => c.key === key);
-      if (found) found.qty++;
-      else S.cart.push({ key, name: it.name, plan, price, qty: 1 });
-      updateCounts();
-    }
-
-    function renderCart() {
-      const total = S.cart.reduce((a, b) => a + b.price * b.qty, 0);
-      document.getElementById('cart-list').innerHTML = S.cart.length
-        ? S.cart.map((c) => `<div class="flex justify-between bg-slate-950 p-2.5 rounded-xl"><span>${c.name} (${c.plan}) x${c.qty}</span><span class="font-mono">${brl(c.price * c.qty)}</span></div>`).join('')
-        : '<div class="text-slate-400 text-center py-6">Carrinho vazio</div>';
-      document.getElementById('cart-total').textContent = brl(total);
-    }
-
-    function buyCart() {
-      if (!S.cart.length) return;
-      const gross = S.cart.reduce((a, b) => a + b.price * b.qty, 0);
-      const net = +(gross * (1 - S.fee)).toFixed(2);
-      S.gross = +(S.gross + gross).toFixed(2);
-      S.net = +(S.net + net).toFixed(2);
-      S.cash = +(S.cash + net).toFixed(2);
-      S.tx.unshift({ label: S.cart.map((c) => `${c.name} x${c.qty}`).join(', '), gross, net, date: new Date().toLocaleTimeString('pt-BR') });
-      S.cart.forEach((c) => {
-        for (let i = 0; i < c.qty; i++) {
-          S.keys.unshift({ prod: `${c.name} (${c.plan})`, key: 'NX-' + Math.random().toString(36).slice(2, 10).toUpperCase() });
-        }
-      });
-      S.cart = [];
-      closeModal('cart-modal');
-      renderShop();
-      renderKeys();
-      openModal('keys-modal');
-    }
-
-    function genPaidFreeKey() {
-      const price = 1.00;
-      const net = +(price * (1 - S.fee)).toFixed(2);
-      const tag = (document.getElementById('fk-label').value || '').trim() || 'Key Grátis 24h';
-      const code = 'FREE-' + Math.random().toString(36).slice(2, 9).toUpperCase();
-
-      S.gross = +(S.gross + price).toFixed(2);
-      S.net = +(S.net + net).toFixed(2);
-      S.cash = +(S.cash + net).toFixed(2);
-      S.tx.unshift({ label: `Key R$ 1 (${tag})`, gross: price, net, date: new Date().toLocaleTimeString('pt-BR') });
-      S.keys.unshift({ prod: `${tag} [R$ 1,00]`, key: code });
-
-      document.getElementById('fk-label').value = '';
-      closeModal('freekey-modal');
-      renderKeys();
-      updateCounts();
-      openModal('keys-modal');
-    }
-
-    function renderKeys() {
-      document.getElementById('keys-list').innerHTML = S.keys.length
-        ? S.keys.map((k) => `<div class="bg-slate-950 p-2.5 rounded-xl flex justify-between items-center"><div><div class="font-semibold">${k.prod}</div><code class="text-cyan-400">${k.key}</code></div><button onclick="copyTxt('${k.key}')" class="px-2 py-1 rounded bg-slate-800">Copiar</button></div>`).join('')
-        : '<div class="text-slate-400 text-center py-6">Sem keys</div>';
-    }
-
-    function copyTxt(t) {
-      const ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-    }
-
-    function openWallet() {
-      document.getElementById('w-gross').textContent = brl(S.gross);
-      document.getElementById('w-net').textContent = brl(S.net);
-      document.getElementById('w-cash').textContent = brl(S.cash);
-      const sales = S.tx.filter((t) => t.gross > 0).slice(0, 7).reverse();
-      const max = Math.max(...sales.map((x) => x.gross), 1);
-      document.getElementById('w-chart').innerHTML = sales.length
-        ? `<div class="flex items-end gap-2 h-24">${sales.map((x) => `<div class="flex-1 bg-indigo-500 rounded-t" style="height:${Math.max(12, (x.gross / max) * 100)}%" title="${brl(x.gross)}"></div>`).join('')}</div>`
-        : '<div class="text-slate-500 text-center py-6">Sem vendas no gráfico</div>';
-      document.getElementById('w-tx').innerHTML = S.tx.map((t) => `<div class="flex justify-between bg-slate-950 p-2 rounded-lg"><span class="truncate">${t.label}</span><span class="font-mono text-emerald-400">${t.net ? '+' + brl(t.net) : '-' + brl(t.out)}</span></div>`).join('');
-      openModal('wallet-modal');
-    }
-
-    function withdraw() {
-      if (S.cash <= 0) return;
-      S.tx.unshift({ label: 'Saque do Dono', out: S.cash, date: new Date().toLocaleTimeString('pt-BR') });
-      S.cash = 0;
-      openWallet();
-      updateCounts();
-    }
-
-    function fillSample() {
-      document.getElementById('code-in').value = 'game.Players.LocalPlayer:Kick("Anti-cheat")\nRemote:FireServer("BanCheck")';
-      checkCode();
-    }
-
-    function checkCode() {
-      const txt = document.getElementById('code-in').value.toLowerCase();
-      const kick = /:\s*kick\s*\(|kickar|auto[\s_-]*kick/.test(txt);
-      const ban = /\bban\b|anticheat|banwave|fireserver|hookmetamethod/.test(txt);
-      document.getElementById('code-out').innerHTML = `
-        <div class="p-3 rounded-xl border ${ban ? 'bg-rose-500/10 border-rose-500/30 text-rose-300' : kick ? 'bg-amber-500/10 border-amber-500/30 text-amber-300' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'}">
-          <div><b>Kick Automático:</b> ${kick ? 'SIM (Risco)' : 'NÃO'}</div>
-          <div><b>Risco de Ban:</b> ${ban ? 'ALTO' : 'BAIXO'}</div>
-        </div>`;
-    }
-
-    function updateCounts() {
-      document.getElementById('c-count').textContent = S.cart.reduce((a, b) => a + b.qty, 0);
-      document.getElementById('k-count').textContent = S.keys.length;
-      document.getElementById('w-bal').textContent = brl(S.cash);
-    }
-
-    documen
+<script>
+'use strict';
+const STORAGE_KEY = 'nexusstore-demo-v2';
+const brl = value => Number(value || 0).toLocaleString('pt-BR', {style:'currency',currency:'BRL'});
+const fallbackImage = text => 'https://placehold.co/600x240/0f172a/38bdf8?text=' + encodeURIComponent(text || 'NexusStore');
+const safeText = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+const makeId = () => 'item-' + (crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2));
+const makeKey = prefix => {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return prefix + Array.from(bytes, b => b.toString(16).padStart(2,'0')).join('').toUpperCase();
+};
+const defaultItems = [
+  {id:'delta',name:'Delta Executor',game:'Universal',cat:'Executor',img:fallbackImage('DELTA EXECUTOR'),plans:[['7 dias',14.90],['30 dias',34.90],['VIP',79.90]]},
+  {id:'fluxus',name:'Fluxus Executor',game:'Universal',cat:'Executor',img:fallbackImage('FLUXUS EXECUTOR'),plans:[['7 dias',16.90],['30 dias',39.90],['VIP',89.90]]},
+  {id:'solara',name:'Solara Executor',game:'Universal',cat:'Executor',img:fallbackImage('SOLARA EXECUTOR'),plans:[['7 dias',18.90],['30 dias',44.90],['VIP',99.90]]},
+  {id:'wave',name:'Wave Executor',game:'Universal',cat:'Executor',img:fallbackImage('WAVE EXECUTOR'),plans:[['7 dias',19.90],['30 dias',46.90],['VIP',104.90]]},
+  {id:'aether',name:'Aether Hub',game:'Blox Fruits',cat:'Script Hub',img:fallbackImage('AETHER HUB'),plans:[['7 dias',12.90],['30 dias',29.90],['VIP',69.90]]},
+  {id:'shadow',name:'Shadow ESP Hub',game:'Doors',cat:'Script Hub',img:fallbackImage('SHADOW HUB'),plans:[['7 dias',11.90],['30 dias',27.90],['VIP',59.90]]}
+];
+const freshState = () => ({cat:'Todos',game:'Todos',fee:0.05,cash:0,gross:0,net:0,tx:[],cart:[],keys:[],selected:{},items:defaultItems});
+function loadState(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return freshState();
+    const saved = JSON.parse(raw);
+    const base = freshState();
+    if (!saved || typeof saved !== 'object') return base;
+    return {...base,...saved,items:Array.isArray(saved.items)?saved.items:base.items,cart:Array.isArray(saved.cart)?saved.cart:[],keys:Array.isArray(saved.keys)?saved.keys:[],tx:Array.isArray(saved.tx)?saved.tx:[],selected:saved.selected && typeof saved.selected==='object'?saved.selected:{}};
+  } catch (error) { console.warn('Não foi possível carregar os dados locais.',error); return freshState(); }
+}
+const S = loadState();
+function persist(){
+  try { localStorage.setItem(STORAGE_KEY,JSON.stringify(S)); }
+  catch(error){ console.warn('Falha ao salvar no armazenamento local.',error); toast('Não foi possível salvar. Verifique o espaço do navegador.'); }
+}
+function toast(message){
+  const el=document.getElementById('notice');
+  if(el){el.textContent=message;el.hidden=false;clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.hidden=true,3200);}
+}
+function openModal(id){const el=document.getElementById(id);if(!el)return;el.classList.remove('hidden');el.classList.add('flex');const first=el.querySelector('button,input,select');if(first)first.focus();}
+function closeModal(id){const el=document.getElementById(id);if(!el)return;el.classList.add('hidden');el.classList.remove('flex');}
+document.querySelectorAll('.modal').forEach(modal=>{
+  modal.addEventListener('click',event=>{if(event.target===modal)closeModal(modal.id);});
+});
+document.addEventListener('keydown',event=>{if(event.key==='Escape')document.querySelectorAll('.modal:not(.hidden)').forEach(modal=>closeModal(modal.id));});
+function setView(view){
+  document.getElementById('view-shop').classList.toggle('hidden',view!=='shop');
+  document.getElementById('view-check').classList.toggle('hidden',view!=='check');
+}
+function renderShop(){
+  const categories=['Todos','Executor','Script Hub','Combo'];
+  document.getElementById('cats').innerHTML=categories.map(cat=>'<button onclick="S.cat='+JSON.stringify(cat)+';renderShop()" class="rounded-xl px-3 py-1.5 text-xs font-semibold '+(S.cat===cat?'bg-indigo-600':'border border-slate-800 bg-slate-900 text-slate-300')+'">'+safeText(cat)+'</button>').join('');
+  const games=['Todos',...new Set(S.items.map(item=>item.game))];
+  const select=document.getElementById('game-sel');
+  if(!games.includes(S.game))S.game='Todos';
+  select.innerHTML=games.map(game=>'<option value="'+safeText(game)+'" '+(game===S.game?'selected':'')+'>'+safeText(game)+'</option>').join('');
+  const visible=S.items.filter(item=>(S.cat==='Todos'||item.cat===S.cat)&&(S.game==='Todos'||item.game===S.game));
+  document.getElementById('empty-shop').classList.toggle('hidden',visible.length>0);
+  document.getElementById('grid').innerHTML=visible.map(item=>{
+    const index=Math.min(Number(S.selected[item.id]||0),item.plans.length-1);
+    const plan=item.plans[index]||item.plans[0];
+    const image=validImage(item.img)?item.img:fallbackImage(item.game);
+    return '<article class="flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-800 bg-slate-900"><div><img src="'+safeText(image)+'" alt="Imagem de '+safeText(item.name)+'" loading="lazy" class="h-36 w-full object-cover" onerror="this.onerror=null;this.src='+JSON.stringify(fallbackImage(item.game))+'"><div class="space-y-3 p-4"><div class="flex justify-between gap-2 text-[11px] text-cyan-300"><span>'+safeText(item.game)+'</span><span>'+safeText(item.cat)+'</span></div><h2 class="font-bold">'+safeText(item.name)+'</h2><div class="grid grid-cols-'+item.plans.length+' gap-1 rounded-xl bg-slate-950 p-1">'+item.plans.map((p,i)=>'<button onclick="S.selected['+JSON.stringify(item.id)+']='+i+';renderShop()" class="rounded-lg py-1.5 text-[11px] '+(i===index?'bg-indigo-600 text-white':'text-slate-400')+'">'+safeText(p[0])+'</button>').join('')+'</div></div></div><div class="flex items-center justify-between px-4 pb-4"><span class="font-mono text-sm font-bold">'+brl(plan[1])+'</span><button onclick="addCart('+JSON.stringify(item.id)+','+index+')" class="rounded-xl bg-indigo-600 px-3 py-2 text-xs font-semibold hover:bg-indigo-500">Adicionar</button></div></article>';
+  }).join('');
+  updateCounts();persist();
+}
+function validImage(url){
+  try{const parsed=new URL(url);return parsed.protocol==='https:'||parsed.protocol==='http:';}catch{return false;}
+}
+function addItem(event){
+  event.preventDefault();
+  const name=document.getElementById('n-name').value.trim();
+  const game=document.getElementById('n-game').value.trim();
+  const cat=document.getElementById('n-cat').value;
+  const rawImage=document.getElementById('n-img').value.trim();
+  const prices=['p-7','p-30','p-life'].map(id=>Number(document.getElementById(id).value));
+  if(!name||!game||prices.some(price=>!Number.isFinite(price)||price<=0||price>999999)){toast('Preencha os campos e informe preços válidos.');return;}
+  if(rawImage&&!validImage(rawImage)){toast('A imagem precisa usar uma URL HTTP ou HTTPS válida.');return;}
+  S.items.unshift({id:makeId(),name,game,cat,img:rawImage||fallbackImage(game),plans:[['7 dias',prices[0]],['30 dias',prices[1]],['VIP',prices[2]]]});
+  document.getElementById('add-form').reset();closeModal('add-modal');renderShop();toast('Produto adicionado.');
+}
+function addCart(id,index){
+  const item=S.items.find(product=>product.id===id);
+  if(!item||!item.plans[index])return;
+  const plan=item.plans[index];
+  const key=id+'-'+plan[0];
+  const existing=S.cart.find(row=>row.key===key);
+  if(existing)existing.qty=Math.min(existing.qty+1,99);
+  else S.cart.push({key,name:item.name,plan:plan[0],price:plan[1],qty:1});
+  updateCounts();persist();toast('Adicionado ao carrinho.');
+}
+function renderCart(){
+  const total=S.cart.reduce((sum,row)=>sum+row.price*row.qty,0);
+  document.getElementById('cart-list').innerHTML=S.cart.length?S.cart.map((row,index)=>'<div class="flex items-center justify-between gap-3 rounded-xl bg-slate-950 p-3"><span>'+safeText(row.name)+' ('+safeText(row.plan)+') × '+row.qty+'<br><span class="text-slate-400">'+brl(row.price*row.qty)+'</span></span><button onclick="removeCart('+index+')" class="rounded-lg bg-slate-800 px-3 py-2">Remover</button></div>').join(''):'<p class="py-6 text-center text-slate-400">Carrinho vazio.</p>';
+  document.getElementById('cart-total').textContent=brl(total);
+}
+function removeCart(index){S.cart.splice(index,1);renderCart();updateCounts();persist();}
+function buyCart(){
+  if(!S.cart.length){toast('O carrinho está vazio.');return;}
+  const gross=Number(S.cart.reduce((sum,row)=>sum+row.price*row.qty,0).toFixed(2));
+  const net=Number((gross*(1-S.fee)).toFixed(2));
+  S.gross=Number((S.gross+gross).toFixed(2));S.net=Number((S.net+net).toFixed(2));S.cash=Number((S.cash+net).toFixed(2));
+  S.tx.unshift({label:S.cart.map(row=>row.name+' × '+row.qty).join(', '),gross,net,date:new Date().toISOString()});
+  S.cart.forEach(row=>{for(let i=0;i<row.qty;i++)S.keys.unshift({prod:row.name+' ('+row.plan+')',key:makeKey('NX-')});});
+  S.cart=[];persist();closeModal('cart-modal');renderShop();renderKeys();openModal('keys-modal');
+}
+function renderKeys(){
+  document.getElementById('keys-list').innerHTML=S.keys.length?S.keys.map((row,index)=>'<div class="flex items-center justify-between gap-3 rounded-xl bg-slate-950 p-3"><div class="min-w-0"><p class="font-semibold">'+safeText(row.prod)+'</p><code class="break-all text-cyan-300">'+safeText(row.key)+'</code></div><button onclick="copyKey('+index+')" class="shrink-0 rounded-lg bg-slate-800 px-3 py-2">Copiar</button></div>').join(''):'<p class="py-6 text-center text-slate-400">Nenhuma key gerada.</p>';
+  updateCounts();
+}
+async function copyKey(index){
+  const key=S.keys[index]?.key;if(!key)return;
+  try{await navigator.clipboard.writeText(key);toast('Key copiada.');}
+  catch{const area=document.createElement('textarea');area.value=key;document.body.appendChild(area);area.select();document.execCommand('copy');area.remove();toast('Tentativa de cópia concluída.');}
+}
+function openWallet(){
+  document.getElementById('w-gross').textContent=brl(S.gross);document.getElementById('w-net').textContent=brl(S.net);document.getElementById('w-cash').textContent=brl(S.cash);
+  document.getElementById('w-tx').innerHTML=S.tx.length?S.tx.map(row=>'<div class="flex justify-between gap-3 rounded-lg bg-slate-950 p-3"><span class="min-w-0">'+safeText(row.label)+'<small class="block text-slate-500">'+new Date(row.date).toLocaleString('pt-BR')+'</small></span><span class="shrink-0 font-mono '+(row.out?'text-amber-300':'text-emerald-300')+'">'+(row.out?'-':'+')+brl(row.net??row.out)+'</span></div>').join(''):'<p class="py-6 text-center text-slate-400">Nenhum registro.</p>';
+  openModal('wallet-modal');
+}
+function withdraw(){
+  if(S.cash<=0){toast('Não há saldo para retirar.');return;}
+  const amount=S.cash;S.tx.unshift({label:'Retirada simulada',out:amount,date:new Date().toISOString()});S.cash=0;persist();openWallet();updateCounts();
+}
+function checkCode(){
+  const text=document.getElementById('code-in').value.toLowerCase();
+  if(!text.trim()){toast('Cole um trecho de texto para analisar.');return;}
+  const checks=[
+    {label:'Chamadas explícitas de Kick',pattern:/:\s*kick\s*\(|\.kick\s*\(/i},
+    {label:'Referências a banimento',pattern:/\bban(?:ned|wave)?\b|anticheat|anti[\s_-]*cheat/i},
+    {label:'Chamadas remotas',pattern:/fireserver|invokeserver/i},
+    {label:'Funções de hooking',pattern:/hookmetamethod|hookfunction/i}
+  ];
+  const found=checks.filter(check=>check.pattern.test(text));
+  const output=document.getElementById('code-out');output.replaceChildren();
+  const card=document.createElement('div');
+  card.className='rounded-xl border p-3 '+(found.length?'border-amber-500/30 bg-amber-500/10 text-amber-200':'border-emerald-500/30 bg-emerald-500/10 text-emerald-200');
+  const heading=document.createElement('strong');heading.textContent=found.length?'Indicadores encontrados':'Nenhum indicador conhecido encontrado';card.appendChild(heading);
+  const list=document.createElement('ul');list.className='mt-2 list-inside list-disc space-y-1';
+  (found.length?found.map(item=>item.label):['A busca não encontrou os padrões configurados.']).forEach(label=>{const li=document.createElement('li');li.textContent=label;list.appendChild(li);});
+  card.appendChild(list);const note=document.createElement('p');note.className='mt-3 text-slate-300';note.textContent='Resultado heurístico: ausência de indicadores não prova que o código seja seguro, e a presença deles não confirma uma punição.';card.appendChild(note);output.appendChild(card);
+}
+function updateCounts(){
+  document.getElementById('c-count').textContent=S.cart.reduce((sum,row)=>sum+row.qty,0);
+  document.getElementById('k-count').textContent=S.keys.length;
+  document.getElementById('w-bal').textContent=brl(S.cash);
+}
+function addNoticeElement(){
+  const notice=document.createElement('p');notice.id='notice';notice.hidden=true;notice.setAttribute('role','status');notice.className='fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-xs shadow-xl';document.body.appendChild(notice);
+}
+addNoticeElement();
+renderShop();renderKeys();updateCounts();
+</script>
+</body>
+</html>
