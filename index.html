@@ -177,9 +177,9 @@ const makeKey = prefix => {
   return prefix + Array.from(bytes, b => b.toString(16).padStart(2,'0')).join('').toUpperCase();
 };
 const defaultItems = [
-  {id:'studio-ui',name:'Kit de interface para Roblox Studio',game:'Roblox Studio',cat:'Ferramentas Studio',img:fallbackImage('ROBLOX STUDIO UI KIT'),plans:[['7 dias',14.90],['30 dias',34.90],['VIP',79.90]]},
-  {id:'lua-learning',name:'Pacote de estudos de Lua',game:'Aprendizado',cat:'Aprendizado Lua',img:fallbackImage('LUA LEARNING'),plans:[['7 dias',9.90],['30 dias',24.90],['VIP',49.90]]},
-  {id:'studio-custom',name:'Elementos de personalização para Studio',game:'Roblox Studio',cat:'Personalização',img:fallbackImage('STUDIO CUSTOMIZATION'),plans:[['7 dias',12.90],['30 dias',29.90],['VIP',59.90]]}
+  {id:'script-gameplay',name:'Sistema de gameplay para Roblox Studio',game:'Roblox Studio',cat:'Scripts',img:fallbackImage('ROBLOX STUDIO SCRIPT'),plans:[['7 dias',14.90],['30 dias',34.90],['VIP',79.90]]},
+  {id:'module-system',name:'Módulos e sistemas reutilizáveis',game:'Roblox Studio',cat:'Sistemas',img:fallbackImage('ROBLOX MODULES'),plans:[['7 dias',12.90],['30 dias',29.90],['VIP',69.90]]},
+  {id:'hud-interface',name:'Interface HUD para projetos próprios',game:'Roblox Studio',cat:'Interfaces',img:fallbackImage('ROBLOX HUD'),plans:[['7 dias',9.90],['30 dias',24.90],['VIP',59.90]]}
 ];
 const freshState = () => ({cat:'Todos',game:'Todos',fee:0.05,cash:0,gross:0,net:0,tx:[],adsterraEntries:[],cart:[],keys:[],selected:{},items:defaultItems});
 function loadState(){
