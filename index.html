@@ -166,7 +166,7 @@ const defaultItems = [
   {id:'aether',name:'Aether Hub',game:'Blox Fruits',cat:'Script Hub',img:fallbackImage('AETHER HUB'),plans:[['7 dias',12.90],['30 dias',29.90],['VIP',69.90]]},
   {id:'shadow',name:'Shadow ESP Hub',game:'Doors',cat:'Script Hub',img:fallbackImage('SHADOW HUB'),plans:[['7 dias',11.90],['30 dias',27.90],['VIP',59.90]]}
 ];
-const freshState = () => ({cat:'Todos',game:'Todos',fee:0.05,cash:0,gross:0,net:0,tx:[],cart:[],keys:[],selected:{},items:defaultItems});
+const freshState = () => ({cat:'Todos',game:'Todos',fee:0.05,cash:0,gross:0,net:0,tx:[],adsterraEntries:[],cart:[],keys:[],selected:{},items:defaultItems});
 function loadState(){
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -174,7 +174,7 @@ function loadState(){
     const saved = JSON.parse(raw);
     const base = freshState();
     if (!saved || typeof saved !== 'object') return base;
-    return {...base,...saved,items:Array.isArray(saved.items)?saved.items:base.items,cart:Array.isArray(saved.cart)?saved.cart:[],keys:Array.isArray(saved.keys)?saved.keys:[],tx:Array.isArray(saved.tx)?saved.tx:[],selected:saved.selected && typeof saved.selected==='object'?saved.selected:{}};
+    return {...base,...saved,items:Array.isArray(saved.items)?saved.items:base.items,cart:Array.isArray(saved.cart)?saved.cart:[],keys:Array.isArray(saved.keys)?saved.keys:[],tx:Array.isArray(saved.tx)?saved.tx:[],adsterraEntries:Array.isArray(saved.adsterraEntries)?saved.adsterraEntries:[],selected:saved.selected && typeof saved.selected==='object'?saved.selected:{}};
   } catch (error) { console.warn('Não foi possível carregar os dados locais.',error); return freshState(); }
 }
 const S = loadState();
@@ -197,9 +197,9 @@ function recordAdsterra(){
   const amount=Number(document.getElementById('adsterra-amount').value);
   const description=document.getElementById('adsterra-description').value.trim()||'Ganhos Adsterra';
   if(!Number.isFinite(amount)||amount<=0||amount>9999999){toast('Informe um valor em dólar válido.');return;}
-  S.tx.unshift({label:description,gross:amount,net:amount,currency:'USD',date:new Date().toISOString(),source:'adsterra'});
-  S.adsterraTotal=Number(((S.adsterraTotal||0)+amount).toFixed(2));
-  document.getElementById('adsterra-summary').textContent='Total registrado: '+S.adsterraTotal.toLocaleString('en-US',{style:'currency',currency:'USD'});
+  S.adsterraEntries.unshift({description,amount,date:new Date().toISOString()});
+  S.adsterraTotal=Number(S.adsterraEntries.reduce((sum,row)=>sum+Number(row.amount||0),0).toFixed(2));
+  document.getElementById('adsterra-summary').textContent='Total registrado: '+S.adsterraTotal.toLocaleString('en-US',{style:'currency',currency:'USD'})+' · '+S.adsterraEntries.length+' lançamento(s)';
   document.getElementById('adsterra-amount').value='';
   persist();toast('Ganho registrado no histórico local.');
 }
