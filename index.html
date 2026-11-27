@@ -34,6 +34,9 @@
     </header>
 
     <div class="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs leading-relaxed text-amber-200">
+      <strong>Informação sobre keys:</strong> cada emissão tem taxa prevista de <strong>R$ 0,50</strong>. O pagamento e a entrega automática ainda não estão integrados; não finalize compras reais por esta página.
+    </div>
+    <div class="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs leading-relaxed text-amber-200">
       <strong>Catálogo online:</strong> os produtos são salvos no Supabase. Carrinho, registro de vendas e geração de keys ainda são demonstração local; não há pagamento real nem validação de licença em servidor.
     </div>
 
@@ -87,14 +90,14 @@
 
   <div id="keys-modal" class="modal fixed inset-0 z-40 hidden items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-labelledby="keys-title">
     <div class="w-full max-w-lg space-y-3 rounded-2xl border border-slate-800 bg-slate-900 p-5">
-      <div class="flex items-center justify-between"><h2 id="keys-title" class="font-bold">Keys de demonstração</h2><button onclick="closeModal('keys-modal')" aria-label="Fechar" class="text-slate-400">✕</button></div>
+      <div class="flex items-center justify-between"><h2 id="keys-title" class="font-bold">Keys · taxa prevista de R$ 0,50 por emissão</h2><button onclick="closeModal('keys-modal')" aria-label="Fechar" class="text-slate-400">✕</button></div>
       <div id="keys-list" class="max-h-72 space-y-2 overflow-y-auto text-xs"></div>
     </div>
   </div>
 
   <div id="wallet-modal" class="modal fixed inset-0 z-40 hidden items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-labelledby="wallet-title">
     <div class="w-full max-w-lg space-y-4 rounded-2xl border border-slate-800 bg-slate-900 p-5">
-      <div class="flex items-center justify-between"><h2 id="wallet-title" class="font-bold">Resumo local de vendas</h2><button onclick="closeModal('wallet-modal')" aria-label="Fechar" class="text-slate-400">✕</button></div>
+      <div class="flex items-center justify-between"><h2 id="wallet-title" class="font-bold">Carteira do proprietário · dados locais de demonstração</h2><button onclick="closeModal('wallet-modal')" aria-label="Fechar" class="text-slate-400">✕</button></div>
       <div class="grid grid-cols-3 gap-2 rounded-xl border border-slate-800 bg-slate-950 p-3 text-center">
         <div><p class="text-[10px] text-slate-400">BRUTO</p><p id="w-gross" class="mt-1 font-mono text-xs font-bold">R$ 0,00</p></div>
         <div><p class="text-[10px] text-slate-400">LÍQUIDO</p><p id="w-net" class="mt-1 font-mono text-xs font-bold text-indigo-300">R$ 0,00</p></div>
@@ -163,7 +166,8 @@
 'use strict';
 const SUPABASE_URL='https://ppbufhqdaanvgrkyisrd.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_NGXNqQ1rflxE0XRuhkZBKw__OrqJDan';
-const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+const SITE_URL='https://zezeanima7-create.github.io/NexusStore/';
+const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{flowType:'pkce',detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}});
 let currentUser=null,editingProductId=null;
 function isOwner(){return currentUser?.app_metadata?.role==='owner';}
 async function refreshAuth(){const {data,error}=await supabaseClient.auth.getSession();if(error)console.error(error);currentUser=data.session?.user||null;updateAccountUI();renderShop();}
@@ -335,6 +339,7 @@ async function copyKey(index){
   catch{const area=document.createElement('textarea');area.value=key;document.body.appendChild(area);area.select();document.execCommand('copy');area.remove();toast('Tentativa de cópia concluída.');}
 }
 function openWallet(){
+  if(!isOwner()){toast('A carteira é restrita à conta proprietária.');openAccount();return;}
   document.getElementById('w-gross').textContent=brl(S.gross);document.getElementById('w-net').textContent=brl(S.net);document.getElementById('w-cash').textContent=brl(S.cash);
   document.getElementById('w-tx').innerHTML=S.tx.length?S.tx.map(row=>'<div class="flex justify-between gap-3 rounded-lg bg-slate-950 p-3"><span class="min-w-0">'+safeText(row.label)+'<small class="block text-slate-500">'+new Date(row.date).toLocaleString('pt-BR')+'</small></span><span class="shrink-0 font-mono '+(row.out?'text-amber-300':'text-emerald-300')+'">'+(row.out?'-':'+')+brl(row.net??row.out)+'</span></div>').join(''):'<p class="py-6 text-center text-slate-400">Nenhum registro.</p>';
   openModal('wallet-modal');
@@ -372,12 +377,13 @@ function updateAccountUI(){
  const status=document.getElementById('account-status');
  if(status)status.textContent=currentUser?'Conectado: '+currentUser.email+(isOwner()?' · Proprietária':' · Conta de cliente'):'Nenhuma sessão ativa.';
  const addButton=[...document.querySelectorAll('#menu-panel button')].find(button=>button.textContent.includes('+ Produto'));if(addButton)addButton.hidden=!isOwner();
+ document.querySelectorAll('#menu-panel button').forEach(button=>{if(button.textContent.trim().startsWith('Carteira')||button.textContent.includes('Ganhos Adsterra'))button.hidden=!isOwner();});
 }
 function openAccount(){updateAccountUI();openModal('account-modal');}
 async function authAccount(mode){
  const email=document.getElementById('account-email').value.trim(),password=document.getElementById('account-password').value;
  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||password.length<8){toast('Informe e-mail válido e senha com pelo menos 8 caracteres.');return;}
- const result=mode==='register'?await supabaseClient.auth.signUp({email,password}):await supabaseClient.auth.signInWithPassword({email,password});
+ const result=mode==='register'?await supabaseClient.auth.signUp({email,password,options:{emailRedirectTo:SITE_URL}}):await supabaseClient.auth.signInWithPassword({email,password});
  if(result.error){toast(result.error.message);return;}
  if(mode==='register'&&!result.data.session)toast('Conta criada. Confirme o e-mail para entrar.');else toast('Autenticação concluída.');
  currentUser=result.data.user||result.data.session?.user||null;updateAccountUI();await renderShop();
